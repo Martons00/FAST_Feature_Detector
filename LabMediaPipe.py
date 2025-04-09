@@ -225,10 +225,10 @@ if __name__ == "__main__":
 
     statusIn10s = []
     ears = []
-    start_dis = 0
 
 
     start = time.time()
+
     while cap.isOpened():
         success, image = cap.read()
         
