@@ -4,6 +4,22 @@ import numpy as np
 import time
 import statistics as st
 import matplotlib.pyplot as plt
+import asyncio
+from telegram.ext import ApplicationBuilder, ContextTypes
+
+
+distraction_start_time = None
+alert_sent = False
+telegram_alert = True
+
+
+async def send_alert(message):
+    # Crea l'applicazione del bot
+    application = ApplicationBuilder().token("8108011699:AAFi0JteNR76vJTl6DXu_8KIUEf69WnAtmM").build()
+
+    # Invia il messaggio al chat_id specificato
+    await application.bot.send_message(chat_id="501698070", text=message)
+
 
 def calculateClosedEyeRatio(eye):
     A = np.sqrt(abs(eye[1][0] - eye[5][0])**2 + abs(eye[1][1] - eye[5][1])**2)
@@ -31,20 +47,40 @@ def calculateEAR(image, left_eye_pos_2d, right_eye_pos_2d,ears):
 
     return ear_sx, ear_dx, ear
 
-def check_driver_distraction(pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, pitch, yaw, roll,image, img_w):
-    # Calcola gli angoli medi dello sguardo per gli occhi
+def check_driver_distraction(pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, pitch, yaw, roll, image, img_w):
+    """
+    Verifica se il conducente è distratto e invia un messaggio solo dopo 5 secondi consecutivi di distrazione.
+    """
+    global distraction_start_time, alert_sent
+
     avg_pitch_eyes = (pitch_left_eye + pitch_right_eye) / 2
     avg_yaw_eyes = (yaw_left_eye + yaw_right_eye) / 2
-    
-    # Combina gli angoli della testa e degli occhi
+
     combined_pitch = pitch + avg_pitch_eyes
     combined_yaw = yaw + avg_yaw_eyes
-    
-    # Verifica se gli angoli combinati differiscono più di ±30° dalla posizione di riposo
-    if abs(combined_pitch) > 30 or abs(combined_yaw) > 30 or abs(roll) > 30:
+
+    is_distracted = abs(combined_pitch) > 30 or abs(combined_yaw) > 30 or abs(roll) > 30
+
+    if is_distracted:
         cv2.putText(image, "Distracted", (int(img_w * 0.5), 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        if distraction_start_time is None:
+            distraction_start_time = time.time()
+            alert_sent = False  # Reset dell'allarme
+
+        distraction_duration = time.time() - distraction_start_time
+
+        if distraction_duration >= 5 and not alert_sent:
+            global telegram_alert
+            if telegram_alert:
+                asyncio.run(send_alert("ATTENZIONE: Il conducente sembra distratto da più di 5 secondi!"))
+            alert_sent = True  
+
+        cv2.putText(image, f"Distracted: {int(distraction_duration)}s", (int(img_w * 0.5), 90),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
     else:
         cv2.putText(image, "Not Distracted", (int(img_w * 0.5), 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+        distraction_start_time = None
+        alert_sent = False
 
 
 # Crea la figura FUORI dalla funzione (una sola volta)
@@ -95,6 +131,8 @@ def checkAwake(ear, ears, start, statusIn10s, image):
         statusIn10s.pop(0)
     if st.mean(statusIn10s) > 0.8 and len(statusIn10s) > 300:
         cv2.putText(image, "DROWSY", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+        if telegram_alert:
+            asyncio.run(send_alert("ATTENZIONE: Il conducente sembra assonnato!"))
     else:
         cv2.putText(image, "AWAKE", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
     plotEars(ears, statusIn10s)
@@ -126,6 +164,7 @@ if __name__ == "__main__":
 
     statusIn10s = []
     ears = []
+    start_dis = 0
 
 
     start = time.time()
