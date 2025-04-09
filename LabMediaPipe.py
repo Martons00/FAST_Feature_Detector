@@ -15,10 +15,16 @@ telegram_alert = True
 
 async def send_alert(message):
     # Crea l'applicazione del bot
-    application = ApplicationBuilder().token("8108011699:AAFi0JteNR76vJTl6DXu_8KIUEf69WnAtmM").build()
+    with open("token.txt", "r") as file:
+        token = file.readline().strip()
+        chat_id = file.readline().strip()
+    print(token)
+    print(chat_id)    
+
+    application = ApplicationBuilder().token(token).build()
 
     # Invia il messaggio al chat_id specificato
-    await application.bot.send_message(chat_id="501698070", text=message)
+    await application.bot.send_message(chat_id=chat_id, text=message)
 
 
 def calculateClosedEyeRatio(eye):
