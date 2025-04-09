@@ -144,6 +144,62 @@ def checkAwake(ear, ears, start, statusIn10s, image):
     cv2.putText(image, "Time: {:.2f}".format(time.time() - start),  (50, 950), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.putText(image, "Mean: {:.2f}".format(st.mean(statusIn10s)), (50, 1000), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
+def checkGaze(image, face_pos_2d, face_pos_3d, left_eye_pos_2d, left_eye_pos_3d, right_eye_pos_2d, right_eye_pos_3d):
+    # The camera matrix
+    focal_length = 1 * img_w
+    cam_matrix = np.array([ [focal_length, 0, img_h / 2],
+    [0, focal_length, img_w / 2],
+    [0, 0, 1]])
+    # The distorsion parameters
+    dist_matrix = np.zeros((4, 1), dtype=np.float64)
+    # Solve PnP
+    success, rot_vec, trans_vec = cv2.solvePnP(face_pos_3d, face_pos_2d, cam_matrix, dist_matrix)
+    success_left_eye, rot_vec_left_eye, trans_vec_left_eye = cv2.solvePnP(left_eye_pos_3d, left_eye_pos_2d, cam_matrix, dist_matrix)
+    success_right_eye, rot_vec_right_eye, trans_vec_right_eye =cv2.solvePnP(right_eye_pos_3d, right_eye_pos_2d, cam_matrix, dist_matrix)
+    # Get rotational matrix
+    rmat, jac = cv2.Rodrigues(rot_vec)
+    rmat_left_eye, jac_left_eye = cv2.Rodrigues(rot_vec_left_eye)
+    rmat_right_eye, jac_right_eye = cv2.Rodrigues(rot_vec_right_eye)
+    # Get angles
+    angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
+    angles_left_eye, mtxR_left_eye, mtxQ_left_eye, Qx_left_eye, Qy_left_eye, Qz_left_eye = cv2.RQDecomp3x3(rmat_left_eye)
+    angles_right_eye, mtxR_right_eye, mtxQ_right_eye, Qx_right_eye, Qy_right_eye, Qz_right_eye = cv2.RQDecomp3x3(rmat_right_eye)
+    # Get angles
+    pitch = angles[0] * 1800
+    yaw = -angles[1] * 1800
+    # Define point_RER and point_LEL based on eye landmarks
+    point_RER = right_eye_pos_2d[0]  
+    point_LEL = left_eye_pos_2d[0]   
+    roll = 180 + (np.arctan2(point_RER[1] - point_LEL[1], point_RER[0] - point_LEL[0]) * 180 / np.pi)
+    if roll > 180:
+        roll = roll - 360
+    pitch_left_eye = angles_left_eye[0] * 1800
+    yaw_left_eye = angles_left_eye[1] * 1800
+    pitch_right_eye = angles_right_eye[0] * 1800
+    yaw_right_eye = angles_right_eye[1] * 1800
+    nose_3d_projection, jacobian = cv2.projectPoints(nose_pos_3d, rot_vec, trans_vec, cam_matrix, dist_matrix)
+    cv2.putText(image, "Roll: {:.2f}".format(roll), (int(img_w * 0.85), 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Pitch: {:.2f}".format(pitch), (int(img_w * 0.85), 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Yaw: {:.2f}".format(yaw), (int(img_w * 0.85), 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Pitch LE: {:.2f}".format(pitch_left_eye), (int(img_w * 0.85), 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Yaw LE: {:.2f}".format(yaw_left_eye), (int(img_w * 0.85), 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Pitch RE: {:.2f}".format(pitch_right_eye), (int(img_w * 0.85), 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Yaw RE: {:.2f}".format(yaw_right_eye), (int(img_w * 0.85), 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+    return roll, pitch, yaw, pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, nose_3d_projection
+
+def plotDirections(image, nose_pos_2d, pitch, yaw, left_pupil_pos_2d, pitch_left_eye, yaw_left_eye, right_pupil_pos_2d, pitch_right_eye, yaw_right_eye, ear):
+    p1 = (int(nose_pos_2d[0]), int(nose_pos_2d[1]))
+    p2 = (int(nose_pos_2d[0] + yaw * 10), int(nose_pos_2d[1] - pitch * 10))
+    cv2.line(image, p1, p2, (255, 0, 0), 3)
+    if ear > 20:
+        p3 = (int(left_pupil_pos_2d[0]), int(left_pupil_pos_2d[1]))
+        p4 = (int(left_pupil_pos_2d[0] + yaw_left_eye * 10), int(left_pupil_pos_2d[1] - pitch_left_eye * 10))
+        cv2.line(image, p3, p4, (255, 0, 0), 3)
+        p5 = (int(right_pupil_pos_2d[0]), int(right_pupil_pos_2d[1]))
+        p6 = (int(right_pupil_pos_2d[0] + yaw_right_eye * 10), int(right_pupil_pos_2d[1] - pitch_right_eye * 10))
+        cv2.line(image, p5, p6, (255, 0, 0), 3)
+
 if __name__ == "__main__":
     FACE_POS_INT = [33, 263, 1, 61, 291, 199] 
     RIGHT_POINT_INT = [468, 33, 145, 133, 159,158]
@@ -250,6 +306,7 @@ if __name__ == "__main__":
             #Task 1-2
             left_eye_pos.sort(key=lambda x: x[2])
             right_eye_pos.sort(key=lambda x: x[2]) 
+
             ear_sx ,ear_dx , ear = calculateEAR(image,left_eye_pos, right_eye_pos,ears)
             checkAwake(ear,ears, start, statusIn10s, image)
 
@@ -267,61 +324,12 @@ if __name__ == "__main__":
             right_pupil_pos_2d = np.array(right_pupil_pos_2d, dtype=np.float64)
             right_pupil_pos_3d = np.array(right_pupil_pos_3d, dtype=np.float64)
 
-            # The camera matrix
-            focal_length = 1 * img_w
-            cam_matrix = np.array([ [focal_length, 0, img_h / 2],
-            [0, focal_length, img_w / 2],
-            [0, 0, 1]])
-            # The distorsion parameters
-            dist_matrix = np.zeros((4, 1), dtype=np.float64)
-            # Solve PnP
-            success, rot_vec, trans_vec = cv2.solvePnP(face_pos_3d, face_pos_2d, cam_matrix, dist_matrix)
-            success_left_eye, rot_vec_left_eye, trans_vec_left_eye = cv2.solvePnP(left_eye_pos_3d, left_eye_pos_2d, cam_matrix, dist_matrix)
-            success_right_eye, rot_vec_right_eye, trans_vec_right_eye =cv2.solvePnP(right_eye_pos_3d, right_eye_pos_2d, cam_matrix, dist_matrix)
-            # Get rotational matrix
-            rmat, jac = cv2.Rodrigues(rot_vec)
-            rmat_left_eye, jac_left_eye = cv2.Rodrigues(rot_vec_left_eye)
-            rmat_right_eye, jac_right_eye = cv2.Rodrigues(rot_vec_right_eye)
-            # Get angles
-            angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
-            angles_left_eye, mtxR_left_eye, mtxQ_left_eye, Qx_left_eye, Qy_left_eye, Qz_left_eye = cv2.RQDecomp3x3(rmat_left_eye)
-            angles_right_eye, mtxR_right_eye, mtxQ_right_eye, Qx_right_eye, Qy_right_eye, Qz_right_eye = cv2.RQDecomp3x3(rmat_right_eye)
-            # Get angles
-            pitch = angles[0] * 1800
-            yaw = -angles[1] * 1800
-            # Define point_RER and point_LEL based on eye landmarks
-            point_RER = right_eye_pos_2d[0]  
-            point_LEL = left_eye_pos_2d[0]   
-            roll = 180 + (np.arctan2(point_RER[1] - point_LEL[1], point_RER[0] - point_LEL[0]) * 180 / np.pi)
-            if roll > 180:
-                roll = roll - 360
-            pitch_left_eye = angles_left_eye[0] * 1800
-            yaw_left_eye = angles_left_eye[1] * 1800
-            pitch_right_eye = angles_right_eye[0] * 1800
-            yaw_right_eye = angles_right_eye[1] * 1800
 
-            cv2.putText(image, "Roll: {:.2f}".format(roll), (int(img_w * 0.85), 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.putText(image, "Pitch: {:.2f}".format(pitch), (int(img_w * 0.85), 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.putText(image, "Yaw: {:.2f}".format(yaw), (int(img_w * 0.85), 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.putText(image, "Pitch LE: {:.2f}".format(pitch_left_eye), (int(img_w * 0.85), 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.putText(image, "Yaw LE: {:.2f}".format(yaw_left_eye), (int(img_w * 0.85), 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.putText(image, "Pitch RE: {:.2f}".format(pitch_right_eye), (int(img_w * 0.85), 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            cv2.putText(image, "Yaw RE: {:.2f}".format(yaw_right_eye), (int(img_w * 0.85), 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
+            roll, pitch, yaw , pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, nose_3d_projection = checkGaze(image,face_pos_2d, face_pos_3d, left_eye_pos_2d, left_eye_pos_3d, right_eye_pos_2d, right_eye_pos_3d)
             check_driver_distraction(pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, pitch, yaw, roll, image, img_w)
+            plotDirections(image, nose_pos_2d, pitch, yaw, left_pupil_pos_2d, pitch_left_eye, yaw_left_eye, right_pupil_pos_2d, pitch_right_eye, yaw_right_eye, ear)
 
-            # Display directions (code example for the nose)
-            nose_3d_projection, jacobian = cv2.projectPoints(nose_pos_3d, rot_vec, trans_vec, cam_matrix, dist_matrix)
-            p1 = (int(nose_pos_2d[0]), int(nose_pos_2d[1]))
-            p2 = (int(nose_pos_2d[0] + yaw * 10), int(nose_pos_2d[1] - pitch * 10))
-            cv2.line(image, p1, p2, (255, 0, 0), 3)
-            if ear > 20:
-                p3 = (int(left_pupil_pos_2d[0]), int(left_pupil_pos_2d[1]))
-                p4 = (int(left_pupil_pos_2d[0] + yaw_left_eye * 10), int(left_pupil_pos_2d[1] - pitch_left_eye * 10))
-                cv2.line(image, p3, p4, (255, 0, 0), 3)
-                p5 = (int(right_pupil_pos_2d[0]), int(right_pupil_pos_2d[1]))
-                p6 = (int(right_pupil_pos_2d[0] + yaw_right_eye * 10), int(right_pupil_pos_2d[1] - pitch_right_eye * 10))
-                cv2.line(image, p5, p6, (255, 0, 0), 3)
             
 
 
