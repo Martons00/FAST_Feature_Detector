@@ -1,0 +1,288 @@
+import cv2
+import mediapipe as mp
+import numpy as np 
+import time
+import statistics as st
+import matplotlib.pyplot as plt
+
+def calculateClosedEyeRatio(eye):
+    A = np.sqrt(abs(eye[1][0] - eye[5][0])**2 + abs(eye[1][1] - eye[5][1])**2)
+    B = np.sqrt(abs(eye[2][0] - eye[4][0])**2 + abs(eye[2][1] - eye[4][1])**2)
+    C = np.sqrt(abs(eye[0][0] - eye[3][0])**2 + abs(eye[0][1] - eye[3][1])**2)
+
+    # Calculate the EAR
+    ear = (A + B) / (2.0 * C)
+    
+    return ear 
+
+def calculateEAR(image, left_eye_pos_2d, right_eye_pos_2d,ears):
+    ear_sx = calculateClosedEyeRatio(left_eye_pos_2d)
+    cv2.putText(image, "EAR SX: {:.2f}".format(ear_sx), (50, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,255), 2)
+    ear_dx = calculateClosedEyeRatio(right_eye_pos_2d)
+    cv2.putText(image, "EAR DX: {:.2f}".format(ear_dx), (50, 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0,255), 2)
+    ear = (ear_sx + ear_dx) / 2.0
+    ear = min(ear, 0.34)  
+    ear = (ear / 0.34) * 100  
+
+    ears.append(ear)
+    if len(ears) > 300:
+        ears.pop(0)
+    cv2.putText(image, "MEAN EAR : {:.2f} %".format(ear), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+    return ear_sx, ear_dx, ear
+
+def check_driver_distraction(pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, pitch, yaw, roll,image, img_w):
+    # Calcola gli angoli medi dello sguardo per gli occhi
+    avg_pitch_eyes = (pitch_left_eye + pitch_right_eye) / 2
+    avg_yaw_eyes = (yaw_left_eye + yaw_right_eye) / 2
+    
+    # Combina gli angoli della testa e degli occhi
+    combined_pitch = pitch + avg_pitch_eyes
+    combined_yaw = yaw + avg_yaw_eyes
+    
+    # Verifica se gli angoli combinati differiscono più di ±30° dalla posizione di riposo
+    if abs(combined_pitch) > 30 or abs(combined_yaw) > 30 or abs(roll) > 30:
+        cv2.putText(image, "Distracted", (int(img_w * 0.5), 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    else:
+        cv2.putText(image, "Not Distracted", (int(img_w * 0.5), 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+
+# Crea la figura FUORI dalla funzione (una sola volta)
+fig, axs = plt.subplots(2, 1, figsize=(10, 5))
+plt.ion()  # Attiva modalità interattiva
+
+# Funzione corretta che aggiorna la stessa figura
+def plotEars(ears, statusIn10s):
+    # Pulisci i subplot esistenti
+    axs[0].clear()
+    axs[1].clear()
+    
+    # Aggiorna il primo subplot (EAR)
+    axs[0].plot(ears, color='blue')
+    axs[0].axhline(y=80, color='green', linestyle='--', label='Threshold 80')
+    axs[0].axhline(y=20, color='red', linestyle='--', label='Threshold 20')
+    axs[0].set_title('EAR Over Time')
+    axs[0].set_xlabel('Time')
+    axs[0].set_ylabel('EAR (%)')
+    axs[0].set_ylim(0, 100)
+    axs[0].set_xlim(0, 300)
+    axs[0].grid()
+    axs[0].legend()
+
+    # Aggiorna il secondo subplot (Status)
+    axs[1].plot(statusIn10s, color='red')
+    axs[1].set_title('Drowsiness Status Over Time')
+    axs[1].set_xlabel('Time')
+    axs[1].set_ylabel('Status')
+    axs[1].set_ylim(-0.5, 1.5)
+    axs[1].set_xlim(0, 300)
+    axs[1].grid()
+
+    # Aggiorna la figura
+    fig.tight_layout()
+    fig.canvas.draw()
+    fig.canvas.flush_events()
+    plt.pause(0.01)
+    
+
+def checkAwake(ear, ears, start, statusIn10s, image):
+    if ear < 20:
+        statusIn10s.append(1)
+    else:
+        statusIn10s.append(0)
+    
+    if len(statusIn10s) > 300:
+        statusIn10s.pop(0)
+    if st.mean(statusIn10s) > 0.8 and len(statusIn10s) > 300:
+        cv2.putText(image, "DROWSY", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    else:
+        cv2.putText(image, "AWAKE", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    plotEars(ears, statusIn10s)
+    cv2.putText(image, "Time: {:.2f}".format(time.time() - start),  (50, 950), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(image, "Mean: {:.2f}".format(st.mean(statusIn10s)), (50, 1000), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
+if __name__ == "__main__":
+    FACE_POS_INT = [33, 263, 1, 61, 291, 199] 
+    RIGHT_POINT_INT = [468, 33, 145, 133, 159,158]
+    LEFT_POINT_INT = [473, 362, 374, 263, 386, 387]
+
+    LEFT_POS_INT = [133, 158, 160, 33, 144, 153]
+    RIGHT_POS_INT = [362, 385, 387, 263, 373, 380]
+
+    
+    mp_face_mesh = mp.solutions.face_mesh
+    face_mesh = mp_face_mesh.FaceMesh(
+        max_num_faces=1,
+        refine_landmarks=True, # Enables  detailed eyes points
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5
+    )
+    mp_drawing_styles = mp.solutions.drawing_styles
+    mp_drawing = mp.solutions.drawing_utils
+
+    drawing_spec = mp_drawing.DrawingSpec(thickness=1, circle_radius=1)
+    cap = cv2.VideoCapture(0)
+
+
+    statusIn10s = []
+    ears = []
+
+
+    start = time.time()
+    while cap.isOpened():
+        success, image = cap.read()
+        
+        # Also convert the color space from BGR to RGB
+        if image is None:
+            break
+            #continue
+        else:
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        # To improve performace
+        image.flags.writeable = False
+        
+        # Get the result
+        results = face_mesh.process(image)
+
+        # To improve performance
+        image.flags.writeable = True
+
+        # Convert the color space from RGB to BGR
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        img_h, img_w, img_c = image.shape
+
+
+
+        left_eye_pos = []
+        right_eye_pos = []
+
+        face_pos_2d = []
+        face_pos_3d = []
+        left_eye_pos_2d = []
+        right_eye_pos_2d = []
+        left_eye_pos_3d = []
+        right_eye_pos_3d = []
+        
+        if results.multi_face_landmarks:
+            for face_landmarks in results.multi_face_landmarks:
+                for idx, lm in enumerate(face_landmarks.landmark):
+                    if idx in FACE_POS_INT:
+                        face_pos_2d.append([int(lm.x * img_w), int(lm.y * img_h)])
+                        face_pos_3d.append([int(lm.x * img_w), int(lm.y * img_h), lm.z])
+                        cv2.circle(image, (int(lm.x * img_w), int(lm.y * img_h)), radius=5, color=(255, 0, 0), thickness=-1)
+                    if idx in LEFT_POINT_INT:
+                        left_eye_pos_2d.append([int(lm.x * img_w), int(lm.y * img_h)])
+                        left_eye_pos_3d.append([int(lm.x * img_w), int(lm.y * img_h), lm.z])
+                        cv2.circle(image, (int(lm.x * img_w), int(lm.y * img_h)), radius=5, color=(0, 255, 0), thickness=-1)
+                    if idx in RIGHT_POINT_INT:
+                        right_eye_pos_2d.append([int(lm.x * img_w), int(lm.y * img_h)])
+                        right_eye_pos_3d.append([int(lm.x * img_w), int(lm.y * img_h), lm.z])
+                        cv2.circle(image, (int(lm.x * img_w), int(lm.y * img_h)), radius=5, color=(0, 0, 255), thickness=-1)
+
+                    if idx in LEFT_POS_INT:
+                        left_eye_pos.append([int(lm.x * img_w), int(lm.y * img_h), LEFT_POS_INT.index(idx)])
+                        cv2.circle(image, (int(lm.x * img_w), int(lm.y * img_h)), radius=5, color=(255, 255, 0), thickness=-1)
+                        cv2.putText(image, str(LEFT_POS_INT.index(idx)), (int(lm.x * img_w), int(lm.y * img_h)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 0), 1)
+                    if idx in RIGHT_POS_INT:
+                        right_eye_pos.append([int(lm.x * img_w), int(lm.y * img_h), RIGHT_POS_INT.index(idx)])
+                        cv2.circle(image, (int(lm.x * img_w), int(lm.y * img_h)), radius=5, color=(255, 0, 255), thickness=-1)
+                        cv2.putText(image, str(RIGHT_POS_INT.index(idx)), (int(lm.x * img_w), int(lm.y * img_h)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 255), 1)
+                    
+                    if idx == 1:
+                        nose_pos_2d = ([int(lm.x * img_w), int(lm.y * img_h), idx])
+                        nose_pos_3d = ([int(lm.x * img_w), int(lm.y * img_h), lm.z * 3000])
+                        cv2.circle(image, (int(lm.x * img_w), int(lm.y * img_h)), radius=5, color=(0, 255, 255), thickness=-1)
+                    if idx == 473:
+                        left_pupil_pos_2d = ([int(lm.x * img_w), int(lm.y * img_h)])
+                        left_pupil_pos_3d = ([int(lm.x * img_w), int(lm.y * img_h), lm.z * 3000])
+                        cv2.circle(image, (int(lm.x * img_w), int(lm.y * img_h)), radius=5, color=(128, 128, 0), thickness=-1)
+                    if idx == 468:
+                        right_pupil_pos_2d = ([int(lm.x * img_w), int(lm.y * img_h), idx])
+                        right_pupil_pos_3d = ([int(lm.x * img_w), int(lm.y * img_h), lm.z * 3000])
+                        cv2.circle(image, (int(lm.x * img_w), int(lm.y * img_h)), radius=5, color=(0, 128, 128), thickness=-1)
+
+            #Task 1-2
+            left_eye_pos.sort(key=lambda x: x[2])
+            right_eye_pos.sort(key=lambda x: x[2]) 
+            ear_sx ,ear_dx , ear = calculateEAR(image,left_eye_pos, right_eye_pos,ears)
+            checkAwake(ear,ears, start, statusIn10s, image)
+
+            #Task 3 in poi 
+            face_pos_2d = np.array(face_pos_2d, dtype=np.float64)
+            face_pos_3d = np.array(face_pos_3d, dtype=np.float64)
+            left_eye_pos_2d = np.array(left_eye_pos_2d, dtype=np.float64)
+            right_eye_pos_2d = np.array(right_eye_pos_2d, dtype=np.float64)
+            left_eye_pos_3d = np.array(left_eye_pos_3d, dtype=np.float64)
+            right_eye_pos_3d = np.array(right_eye_pos_3d, dtype=np.float64)
+            nose_pos_2d = np.array(nose_pos_2d, dtype=np.float64)
+            nose_pos_3d = np.array(nose_pos_3d, dtype=np.float64)
+            left_pupil_pos_2d = np.array(left_pupil_pos_2d, dtype=np.float64)
+            left_pupil_pos_3d = np.array(left_pupil_pos_3d, dtype=np.float64)
+            right_pupil_pos_2d = np.array(right_pupil_pos_2d, dtype=np.float64)
+            right_pupil_pos_3d = np.array(right_pupil_pos_3d, dtype=np.float64)
+
+            # The camera matrix
+            focal_length = 1 * img_w
+            cam_matrix = np.array([ [focal_length, 0, img_h / 2],
+            [0, focal_length, img_w / 2],
+            [0, 0, 1]])
+            # The distorsion parameters
+            dist_matrix = np.zeros((4, 1), dtype=np.float64)
+            # Solve PnP
+            success, rot_vec, trans_vec = cv2.solvePnP(face_pos_3d, face_pos_2d, cam_matrix, dist_matrix)
+            success_left_eye, rot_vec_left_eye, trans_vec_left_eye = cv2.solvePnP(left_eye_pos_3d, left_eye_pos_2d, cam_matrix, dist_matrix)
+            success_right_eye, rot_vec_right_eye, trans_vec_right_eye =cv2.solvePnP(right_eye_pos_3d, right_eye_pos_2d, cam_matrix, dist_matrix)
+            # Get rotational matrix
+            rmat, jac = cv2.Rodrigues(rot_vec)
+            rmat_left_eye, jac_left_eye = cv2.Rodrigues(rot_vec_left_eye)
+            rmat_right_eye, jac_right_eye = cv2.Rodrigues(rot_vec_right_eye)
+            # Get angles
+            angles, mtxR, mtxQ, Qx, Qy, Qz = cv2.RQDecomp3x3(rmat)
+            angles_left_eye, mtxR_left_eye, mtxQ_left_eye, Qx_left_eye, Qy_left_eye, Qz_left_eye = cv2.RQDecomp3x3(rmat_left_eye)
+            angles_right_eye, mtxR_right_eye, mtxQ_right_eye, Qx_right_eye, Qy_right_eye, Qz_right_eye = cv2.RQDecomp3x3(rmat_right_eye)
+            # Get angles
+            pitch = angles[0] * 1800
+            yaw = -angles[1] * 1800
+            # Define point_RER and point_LEL based on eye landmarks
+            point_RER = right_eye_pos_2d[0]  
+            point_LEL = left_eye_pos_2d[0]   
+            roll = 180 + (np.arctan2(point_RER[1] - point_LEL[1], point_RER[0] - point_LEL[0]) * 180 / np.pi)
+            if roll > 180:
+                roll = roll - 360
+            pitch_left_eye = angles_left_eye[0] * 1800
+            yaw_left_eye = angles_left_eye[1] * 1800
+            pitch_right_eye = angles_right_eye[0] * 1800
+            yaw_right_eye = angles_right_eye[1] * 1800
+
+            cv2.putText(image, "Roll: {:.2f}".format(roll), (int(img_w * 0.85), 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(image, "Pitch: {:.2f}".format(pitch), (int(img_w * 0.85), 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(image, "Yaw: {:.2f}".format(yaw), (int(img_w * 0.85), 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(image, "Pitch LE: {:.2f}".format(pitch_left_eye), (int(img_w * 0.85), 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(image, "Yaw LE: {:.2f}".format(yaw_left_eye), (int(img_w * 0.85), 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(image, "Pitch RE: {:.2f}".format(pitch_right_eye), (int(img_w * 0.85), 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+            cv2.putText(image, "Yaw RE: {:.2f}".format(yaw_right_eye), (int(img_w * 0.85), 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+
+            check_driver_distraction(pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, pitch, yaw, roll, image, img_w)
+
+            # Display directions (code example for the nose)
+            nose_3d_projection, jacobian = cv2.projectPoints(nose_pos_3d, rot_vec, trans_vec, cam_matrix, dist_matrix)
+            p1 = (int(nose_pos_2d[0]), int(nose_pos_2d[1]))
+            p2 = (int(nose_pos_2d[0] + yaw * 10), int(nose_pos_2d[1] - pitch * 10))
+            cv2.line(image, p1, p2, (255, 0, 0), 3)
+            if ear > 20:
+                p3 = (int(left_pupil_pos_2d[0]), int(left_pupil_pos_2d[1]))
+                p4 = (int(left_pupil_pos_2d[0] + yaw_left_eye * 10), int(left_pupil_pos_2d[1] - pitch_left_eye * 10))
+                cv2.line(image, p3, p4, (255, 0, 0), 3)
+                p5 = (int(right_pupil_pos_2d[0]), int(right_pupil_pos_2d[1]))
+                p6 = (int(right_pupil_pos_2d[0] + yaw_right_eye * 10), int(right_pupil_pos_2d[1] - pitch_right_eye * 10))
+                cv2.line(image, p5, p6, (255, 0, 0), 3)
+            
+
+
+        cv2.imshow('output window', image)       
+        if cv2.waitKey(5) & 0xFF == 27:
+            break
+    cap.release()
+    cv2.destroyAllWindows()
