@@ -18,8 +18,7 @@ async def send_alert(message):
     with open("token.txt", "r") as file:
         token = file.readline().strip()
         chat_id = file.readline().strip()
-    print(token)
-    print(chat_id)    
+
 
     application = ApplicationBuilder().token(token).build()
 
