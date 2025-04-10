@@ -3,9 +3,8 @@ import mediapipe as mp
 import numpy as np 
 import time
 import statistics as st
-import matplotlib.pyplot as plt
 import asyncio
-from telegram.ext import ApplicationBuilder, ContextTypes
+from telegram.ext import ApplicationBuilder
 
 
 distraction_start_time = None
@@ -88,45 +87,58 @@ def check_driver_distraction(pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_
         alert_sent = False
 
 
-# Crea la figura FUORI dalla funzione (una sola volta)
-fig, axs = plt.subplots(2, 1, figsize=(10, 5))
-plt.ion()  # Attiva modalità interattiva
 
-# Funzione corretta che aggiorna la stessa figura
-def plotEars(ears, statusIn10s):
-    # Pulisci i subplot esistenti
-    axs[0].clear()
-    axs[1].clear()
+
+def plotStats(image, ears, statusIn10s, img_w, img_h):
+
+    # Dimensioni del grafico
+    graph_width = int(img_w * 0.3)
+    graph_height = int(img_h * 0.2)
+    graph_x_start = int(img_w - graph_width - (img_h * 0.05))
+    graph_y_start = int(img_h * 0.75)
+
+    # Disegna il rettangolo di sfondo per il grafico
+    cv2.rectangle(image, (graph_x_start, graph_y_start), 
+                  (graph_x_start + graph_width, graph_y_start + graph_height), 
+                  (255, 255, 255), -1)
+
+    # Disegna il grafico EAR
+    for i in range(1, len(ears)):
+        x1 = graph_x_start + int((i - 1) * graph_width / len(ears))
+        y1 = graph_y_start + graph_height - int(ears[i - 1] * graph_height / 100)
+        x2 = graph_x_start + int(i * graph_width / len(ears))
+        y2 = graph_y_start + graph_height - int(ears[i] * graph_height / 100)
+        cv2.line(image, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+    # Disegna le linee di soglia EAR
+    threshold_80_y = graph_y_start + graph_height - int(80 * graph_height / 100)
+    threshold_20_y = graph_y_start + graph_height - int(20 * graph_height / 100)
+    cv2.line(image, (graph_x_start, threshold_80_y), 
+             (graph_x_start + graph_width, threshold_80_y), 
+             (0, 255, 0), 1)  # Soglia superiore
+    cv2.line(image, (graph_x_start, threshold_20_y), 
+             (graph_x_start + graph_width, threshold_20_y), 
+             (0, 0, 255), 1)  # Soglia inferiore
+
+    # Disegna il grafico dello stato di sonnolenza
+    for i in range(1, len(statusIn10s)):
+        x1 = graph_x_start + int((i - 1) * graph_width / len(statusIn10s))
+        y1 = graph_y_start + int(graph_height * (1 - statusIn10s[i - 1]))
+        x2 = graph_x_start + int(i * graph_width / len(statusIn10s))
+        y2 = graph_y_start + int(graph_height * (1 - statusIn10s[i]))
+        cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0), 2)
+
+    # Etichette e titolo del grafico
+    cv2.putText(image, "EAR Over Time", 
+                (graph_x_start + int(graph_width / 3), graph_y_start - 20),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
+    cv2.putText(image, "Drowsiness Status", 
+                (graph_x_start + int(graph_width / 3), 
+                 graph_y_start + graph_height + 30),
+                cv2.FONT_HERSHEY_SIMPLEX, 0.8, (255, 255, 255), 2)
     
-    # Aggiorna il primo subplot (EAR)
-    axs[0].plot(ears, color='blue')
-    axs[0].axhline(y=80, color='green', linestyle='--', label='Threshold 80')
-    axs[0].axhline(y=20, color='red', linestyle='--', label='Threshold 20')
-    axs[0].set_title('EAR Over Time')
-    axs[0].set_xlabel('Time')
-    axs[0].set_ylabel('EAR (%)')
-    axs[0].set_ylim(0, 100)
-    axs[0].set_xlim(0, 300)
-    axs[0].grid()
-    axs[0].legend()
 
-    # Aggiorna il secondo subplot (Status)
-    axs[1].plot(statusIn10s, color='red')
-    axs[1].set_title('Drowsiness Status Over Time')
-    axs[1].set_xlabel('Time')
-    axs[1].set_ylabel('Status')
-    axs[1].set_ylim(-0.5, 1.5)
-    axs[1].set_xlim(0, 300)
-    axs[1].grid()
-
-    # Aggiorna la figura
-    fig.tight_layout()
-    fig.canvas.draw()
-    fig.canvas.flush_events()
-    plt.pause(0.01)
-    
-
-def checkAwake(ear, ears, start, statusIn10s, image):
+def checkAwake(ear, ears, start, statusIn10s, image, img_w, img_h):
     if ear < 20:
         statusIn10s.append(1)
     else:
@@ -140,7 +152,7 @@ def checkAwake(ear, ears, start, statusIn10s, image):
             asyncio.run(send_alert("ATTENZIONE: Il conducente sembra assonnato!"))
     else:
         cv2.putText(image, "AWAKE", (50, 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-    plotEars(ears, statusIn10s)
+    plotStats(image, ears, statusIn10s, img_w, img_h)
     cv2.putText(image, "Time: {:.2f}".format(time.time() - start),  (50, 950), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
     cv2.putText(image, "Mean: {:.2f}".format(st.mean(statusIn10s)), (50, 1000), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
 
@@ -308,7 +320,7 @@ if __name__ == "__main__":
             right_eye_pos.sort(key=lambda x: x[2]) 
 
             ear_sx ,ear_dx , ear = calculateEAR(image,left_eye_pos, right_eye_pos,ears)
-            checkAwake(ear,ears, start, statusIn10s, image)
+            checkAwake(ear,ears, start, statusIn10s, image, img_w, img_h)
 
             #Task 3 in poi 
             face_pos_2d = np.array(face_pos_2d, dtype=np.float64)
