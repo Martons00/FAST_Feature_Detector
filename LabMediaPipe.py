@@ -10,6 +10,8 @@ from telegram.ext import ApplicationBuilder
 distraction_start_time = None
 alert_sent = False
 telegram_alert = True
+counterWindow = 0
+perclos = 0
 
 
 async def send_alert(message):
@@ -23,6 +25,62 @@ async def send_alert(message):
 
     # Invia il messaggio al chat_id specificato
     await application.bot.send_message(chat_id=chat_id, text=message)
+
+def calculateDeltaTime(earsWindow):
+    t2, t3, t4 = 0, 0, 0
+    t2_1, t2_2, t3_1, t3_2, t4_1, t4_2 = 0, 0, 0, 0, 0, 0
+
+    for i in range(len(earsWindow)):
+
+        #stato di t3
+        if earsWindow[i] <= 20 and earsWindow[i-1] > 20:
+            t3_1 = i
+        if earsWindow[i] >= 20 and earsWindow[i-1] < 20:
+            t3_2 = i
+            if t3_1 != 0:
+                t3 = t3 + t3_2 - t3_1
+                t3_2 = 0
+                t3_1 = 0
+        
+        #stato di t2
+        if earsWindow[i] <= 80 and earsWindow[i-1] > 80:
+            t2_1 = i
+        if earsWindow[i] <= 20 and earsWindow[i-1] > 20:
+            t2_2 = i
+            if t2_1 != 0:
+                t2 = t2 + t2_2 - t2_1
+                t2_2 = 0
+                t2_1 = 0
+
+        #stato di t4
+        if earsWindow[i] <= 20 and earsWindow[i-1] > 20:
+            t4_1 = i
+        if earsWindow[i] >= 80 and earsWindow[i-1] < 80:
+            t4_2 = i
+            if t4_1 != 0:
+                t4 = t4 + t4_2 - t4_1
+                t4_2 = 0
+                t4_1 = 0
+    if t4 != 0:
+        return (t3-t2)/(t4)
+    else:
+        return 0
+    
+def checkPerclos(ears,earsWindow,image, img_w, img_h):
+    global counterWindow
+    global perclos
+    counterWindow += 1
+    if counterWindow == 300:
+        earsWindow = ears.copy()
+        counterWindow = 0
+    if len(earsWindow) > 0:
+        # Calcola percloses
+        perclos = calculateDeltaTime(earsWindow)
+    cv2.putText(image, "Ears: {:.2f}".format(len(ears)), (50, 700), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(image, "EAR Window: {:.2f}".format(len(earsWindow)), (50, 800), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(image, "Counter: {}".format(counterWindow), (50, 850), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+    cv2.putText(image, "Perclos: {}".format(perclos), (50, 900), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+
 
 
 def calculateClosedEyeRatio(eye):
@@ -47,14 +105,12 @@ def calculateEAR(image, left_eye_pos_2d, right_eye_pos_2d,ears):
     ears.append(ear)
     if len(ears) > 300:
         ears.pop(0)
+
     cv2.putText(image, "MEAN EAR : {:.2f} %".format(ear), (50, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
     return ear_sx, ear_dx, ear
 
 def check_driver_distraction(pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, pitch, yaw, roll, image, img_w):
-    """
-    Verifica se il conducente è distratto e invia un messaggio solo dopo 5 secondi consecutivi di distrazione.
-    """
     global distraction_start_time, alert_sent
 
     avg_pitch_eyes = (pitch_left_eye + pitch_right_eye) / 2
@@ -197,6 +253,9 @@ def checkGaze(image, face_pos_2d, face_pos_3d, left_eye_pos_2d, left_eye_pos_3d,
     cv2.putText(image, "Yaw LE: {:.2f}".format(yaw_left_eye), (int(img_w * 0.85), 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
     cv2.putText(image, "Pitch RE: {:.2f}".format(pitch_right_eye), (int(img_w * 0.85), 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
     cv2.putText(image, "Yaw RE: {:.2f}".format(yaw_right_eye), (int(img_w * 0.85), 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.rectangle(image, 
+                  (200, 300), (int(img_w * 0.85), 30),
+                  (255, 255, 255), -1)
 
     return roll, pitch, yaw, pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, nose_3d_projection
 
@@ -237,6 +296,8 @@ if __name__ == "__main__":
 
     statusIn10s = []
     ears = []
+    earsWindow = []
+    counterWindow = 0
 
 
     start = time.time()
@@ -319,6 +380,22 @@ if __name__ == "__main__":
             left_eye_pos.sort(key=lambda x: x[2])
             right_eye_pos.sort(key=lambda x: x[2]) 
 
+            x_start = 40
+            y_start = 650
+            x_width = 300
+            y_height = 400   
+            cv2.rectangle(image, (x_start, y_start), 
+                (x_start + x_width, y_start + y_height), 
+                (255, 255, 255), -1)
+            
+            x_start_2 = 40
+            y_start_2 = 20
+            x_width_2 = 400
+            y_height_2 = 200   
+            cv2.rectangle(image, (x_start_2, y_start_2), 
+                (x_start_2 + x_width_2, y_start_2 + y_height_2), 
+                (255, 255, 255), -1)
+
             ear_sx ,ear_dx , ear = calculateEAR(image,left_eye_pos, right_eye_pos,ears)
             checkAwake(ear,ears, start, statusIn10s, image, img_w, img_h)
 
@@ -341,8 +418,9 @@ if __name__ == "__main__":
             roll, pitch, yaw , pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, nose_3d_projection = checkGaze(image,face_pos_2d, face_pos_3d, left_eye_pos_2d, left_eye_pos_3d, right_eye_pos_2d, right_eye_pos_3d)
             check_driver_distraction(pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, pitch, yaw, roll, image, img_w)
             plotDirections(image, nose_pos_2d, pitch, yaw, left_pupil_pos_2d, pitch_left_eye, yaw_left_eye, right_pupil_pos_2d, pitch_right_eye, yaw_right_eye, ear)
-
-            
+            checkPerclos(ears,earsWindow,image, img_w, img_h)
+            if all(ear > 80 for ear in ears):
+                cv2.putText(image, "ALERT: Distracted", (img_w // 2, img_h // 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
 
         cv2.imshow('output window', image)       
