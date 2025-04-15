@@ -246,16 +246,19 @@ def checkGaze(image, face_pos_2d, face_pos_3d, left_eye_pos_2d, left_eye_pos_3d,
     pitch_right_eye = angles_right_eye[0] * 1800
     yaw_right_eye = angles_right_eye[1] * 1800
     nose_3d_projection, jacobian = cv2.projectPoints(nose_pos_3d, rot_vec, trans_vec, cam_matrix, dist_matrix)
-    cv2.putText(image, "Roll: {:.2f}".format(roll), (int(img_w * 0.85), 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-    cv2.putText(image, "Pitch: {:.2f}".format(pitch), (int(img_w * 0.85), 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-    cv2.putText(image, "Yaw: {:.2f}".format(yaw), (int(img_w * 0.85), 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-    cv2.putText(image, "Pitch LE: {:.2f}".format(pitch_left_eye), (int(img_w * 0.85), 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-    cv2.putText(image, "Yaw LE: {:.2f}".format(yaw_left_eye), (int(img_w * 0.85), 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-    cv2.putText(image, "Pitch RE: {:.2f}".format(pitch_right_eye), (int(img_w * 0.85), 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-    cv2.putText(image, "Yaw RE: {:.2f}".format(yaw_right_eye), (int(img_w * 0.85), 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    # Draw a rectangle to contain the text
     cv2.rectangle(image, 
-                  (200, 300), (int(img_w * 0.85), 30),
+                  (int(img_w * 0.8) - 10, 20), (int(img_w * 0.98), 400),
                   (255, 255, 255), -1)
+
+    # Add text inside the rectangle
+    cv2.putText(image, "Roll: {:.2f}".format(roll), (int(img_w * 0.81), 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Pitch: {:.2f}".format(pitch), (int(img_w * 0.81), 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Yaw: {:.2f}".format(yaw), (int(img_w * 0.81), 150), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Pitch LE: {:.2f}".format(pitch_left_eye), (int(img_w * 0.81), 200), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Yaw LE: {:.2f}".format(yaw_left_eye), (int(img_w * 0.81), 250), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Pitch RE: {:.2f}".format(pitch_right_eye), (int(img_w * 0.81), 300), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+    cv2.putText(image, "Yaw RE: {:.2f}".format(yaw_right_eye), (int(img_w * 0.81), 350), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
     return roll, pitch, yaw, pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, nose_3d_projection
 
