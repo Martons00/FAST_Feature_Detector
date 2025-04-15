@@ -398,6 +398,7 @@ if __name__ == "__main__":
 
             ear_sx ,ear_dx , ear = calculateEAR(image,left_eye_pos, right_eye_pos,ears)
             checkAwake(ear,ears, start, statusIn10s, image, img_w, img_h)
+            checkPerclos(ears,earsWindow,image, img_w, img_h)
 
             #Task 3 in poi 
             face_pos_2d = np.array(face_pos_2d, dtype=np.float64)
@@ -418,7 +419,7 @@ if __name__ == "__main__":
             roll, pitch, yaw , pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, nose_3d_projection = checkGaze(image,face_pos_2d, face_pos_3d, left_eye_pos_2d, left_eye_pos_3d, right_eye_pos_2d, right_eye_pos_3d)
             check_driver_distraction(pitch_left_eye, yaw_left_eye, pitch_right_eye, yaw_right_eye, pitch, yaw, roll, image, img_w)
             plotDirections(image, nose_pos_2d, pitch, yaw, left_pupil_pos_2d, pitch_left_eye, yaw_left_eye, right_pupil_pos_2d, pitch_right_eye, yaw_right_eye, ear)
-            checkPerclos(ears,earsWindow,image, img_w, img_h)
+
             if all(ear > 80 for ear in ears):
                 cv2.putText(image, "ALERT: Distracted", (img_w // 2, img_h // 2), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
 
