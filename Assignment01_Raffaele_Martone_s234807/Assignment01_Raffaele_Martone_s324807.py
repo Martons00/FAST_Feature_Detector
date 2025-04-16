@@ -3,13 +3,14 @@ import mediapipe as mp
 import numpy as np 
 import time
 import statistics as st
-import asyncio
-from telegram.ext import ApplicationBuilder
+telegram_alert = False
+if telegram_alert:
+    import asyncio
+    from telegram.ext import ApplicationBuilder
 
 
 distraction_start_time = None
 alert_sent = False
-telegram_alert = False
 counterWindow = 0
 perclos = 0
 
