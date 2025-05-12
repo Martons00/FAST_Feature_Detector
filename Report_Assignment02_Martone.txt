@@ -1,229 +1,28 @@
-Report sul Motion Planning: Confronto tra Dijkstra e A*
-Introduzione al Motion Planning
-Il motion planning è l’insieme di tecniche che calcolano percorsi collision-free per un robot o un veicolo autonomo, passando da una configurazione iniziale a una finale sulla base di dati geometrici, dinamici e di costo del movimento
-Nel contesto dei veicoli autonomi, un algoritmo di motion planning produce i comandi di velocità e sterzata che devono essere inviati alle ruote del veicolo. Possiamo distinguere due tipi di motion planning:
-
-Global motion planning: utilizzato per creare percorsi verso obiettivi distanti sulla mappa
-
-Local motion planning: utilizzato per creare percorsi nelle vicinanze immediate ed evitare ostacoli
-Tra gli algoritmi classici di global motion planning si distinguono Dijkstra e A*: il primo esplora in ordine di costo crescente senza considerare la destinazione, mentre il secondo integra una funzione euristica che stima la distanza dal goal per guidare la ricerca.
-
-Algoritmo di Dijkstra
-L'algoritmo di Dijkstra trova il percorso di peso minimo tra una coppia di vertici in un grafo diretto e pesato. Risolve il problema del "percorso più breve da un vertice" creando una tabella di informazioni sul miglior modo conosciuto per raggiungere ogni vertice (costo, vertice precedente) e migliorandola fino a raggiungere la soluzione ottimale.
-
-Il principio base dell'algoritmo è:
-
-Inizializzare tutti i nodi con distanza infinita tranne l'origine
-
-Utilizzare una coda a priorità per selezionare sempre il nodo con distanza minima
-
-Aggiornare le distanze dei vicini se viene trovato un percorso migliore
-
-Sebbene Dijkstra garantisca il percorso ottimale, in grafi di grandi dimensioni visita un numero elevato di nodi, risultando in un alto costo computazionale.
-
-Algoritmo A*
-L'algoritmo A* è una delle molte tecniche di ricerca che combinano caratteristiche della ricerca a costo uniforme e della ricerca euristica per calcolare soluzioni ottimali. A* valuta i nodi combinando due funzioni:
-
-g(n): il costo del percorso dall'inizio al nodo n
-
-h(n): la funzione euristica che stima il costo del percorso più economico da n all'obiettivo
-
-La funzione di valutazione è quindi f(n) = g(n) + h(n).
-
-La principale differenza con Dijkstra è che A* "considera non solo quanto un nodo è distante dall'inizio, ma anche quanto è vicino all'obiettivo". Questo consente ad A* di "concentrarsi sui nodi promettenti nella frontiera e trovare il percorso ottimale più velocemente di Dijkstra"
-
-Analisi del Codice
-Lo script utilizza OSMnx per estrarre reti stradali reali e implementa:
-
-Funzioni di styling degli edge (style_unvisited_edge, style_visited_edge, style_active_edge, style_path_edge) e di plotting (plot_graph, plot_heatmap, plot_overlay_heatmap).
-
-L’algoritmo di Dijkstra, che mantiene una coda a priorità di nodi ordinati per distanza accumulata, marcando i visitati e aggiornando i vicini fino al raggiungimento del nodo destinazione.
-
-L’algoritmo di A*, che differisce da Dijkstra nell’uso di due costi 
-g
-(
-n
-)
-g(n) e 
-h
-(
-n
-)
-h(n) (euristica), calcolando 
-f
-(
-n
-)
-=
-g
-(
-n
-)
-+
-h
-(
-n
-)
-f(n)=g(n)+h(n) per esplorare prioritariamente i nodi più promettenti.
-Struttura del Codice
-Funzioni di stile e visualizzazione:
-
-style_unvisited_edge, style_visited_edge, style_active_edge, style_path_edge
-
-plot_graph, plot_heatmap, plot_overlay_heatmap
-
-Implementazione degli algoritmi:
-
-dijkstra(G, orig, dest, plot=False)
-
-A_star(G, orig, dest, plot=False)
-
-Funzioni di supporto:
-
-heuristic(G, node1, node2): calcola la distanza geografica (great-circle) tra due nodi
-
-reconstruct_path(G, orig, dest, plot=False, algorithm=None): ricostruisce il percorso soluzione
-
-Loop principale: compara le performance su diverse città
-
-L'implementazione di Dijkstra utilizza una coda a priorità standard, mentre A* incorpora la funzione euristica per guidare la ricerca verso l'obiettivo. In entrambi i casi, il codice tiene traccia del numero di iterazioni per permettere un confronto equo.
-La funzione reconstruct_path che ricostruisce il percorso ottimale segnando gli archi e accumulando dati su lunghezza e velocità.
-3. Visualizzazione
-Stile Dinamico: Assegna colori e spessori agli archi in base allo stato (non visitato, attivo, percorso ottimo).
-
-Heatmap: Mostra l'utilizzo degli archi con mappe termiche (plot_heatmap).
-
-Sovrapposizione: Confronta visivamente i percorsi di Dijkstra (rosso) e A* (blu) con plot_overlay_heatmap.
-
-4. Raccolta Dati
-Registra iterazioni e distanze per ogni città testata.
-
-Genera un report comparativo in results.txt.
-
-Meccanismi di raccolta statistiche (numero di iterazioni) e di salvataggio dei risultati testuali e grafici per ciascuna località.
-Report sul Motion Planning: Confronto tra Dijkstra e A*
-Introduzione al Motion Planning
-Il motion planning è un campo fondamentale della robotica e dei sistemi autonomi che si occupa di calcolare traiettorie di movimento da una configurazione iniziale a una configurazione finale desiderata, evitando ostacoli e ottimizzando determinati aspetti del movimento stesso.
-
-Come definito nella letteratura scientifica, il motion planning riguarda "il processo di trovare automaticamente modi per muovere un oggetto (robot) evitando ostacoli e rispettando altri vincoli". Questo problema è noto anche come "piano mover's problem" ed è considerato un problema classico della robotica.
-
-Nel contesto dei veicoli autonomi, un algoritmo di motion planning produce i comandi di velocità e sterzata che devono essere inviati alle ruote del veicolo. Possiamo distinguere due tipi di motion planning:
-
-Global motion planning: utilizzato per creare percorsi verso obiettivi distanti sulla mappa
-
-Local motion planning: utilizzato per creare percorsi nelle vicinanze immediate ed evitare ostacoli
-
-Differenze tra gli Algoritmi di Path Planning
-Algoritmo di Dijkstra
-L'algoritmo di Dijkstra trova il percorso di peso minimo tra una coppia di vertici in un grafo diretto e pesato. Risolve il problema del "percorso più breve da un vertice" creando una tabella di informazioni sul miglior modo conosciuto per raggiungere ogni vertice (costo, vertice precedente) e migliorandola fino a raggiungere la soluzione ottimale.
-
-Il principio base dell'algoritmo è:
-
-Inizializzare tutti i nodi con distanza infinita tranne l'origine
-
-Utilizzare una coda a priorità per selezionare sempre il nodo con distanza minima
-
-Aggiornare le distanze dei vicini se viene trovato un percorso migliore
-
-Sebbene Dijkstra garantisca il percorso ottimale, in grafi di grandi dimensioni visita un numero elevato di nodi, risultando in un alto costo computazionale.
-
-Algoritmo A*
-L'algoritmo A* è una delle molte tecniche di ricerca che combinano caratteristiche della ricerca a costo uniforme e della ricerca euristica per calcolare soluzioni ottimali. A* valuta i nodi combinando due funzioni:
-
-g(n): il costo del percorso dall'inizio al nodo n
-
-h(n): la funzione euristica che stima il costo del percorso più economico da n all'obiettivo
-
-La funzione di valutazione è quindi f(n) = g(n) + h(n).
-
-La principale differenza con Dijkstra è che A* "considera non solo quanto un nodo è distante dall'inizio, ma anche quanto è vicino all'obiettivo". Questo consente ad A* di "concentrarsi sui nodi promettenti nella frontiera e trovare il percorso ottimale più velocemente di Dijkstra".
-
-# Architettura e Funzionamento del Codice di Motion Planning
-
-Il codice analizzato implementa un sistema completo per il confronto tra algoritmi di path planning su reti stradali reali, strutturato in un flusso logico che combina acquisizione dati, elaborazione algoritmica e visualizzazione avanzata. L'intero processo si articola in quattro macro-fasi integrate, ognuna con un ruolo specifico nel garantire accuratezza e efficienza.
-
-## 1. Acquisizione e Preparazione dei Dati Stradali
-Il cuore del sistema risiede nell'integrazione con OpenStreetMap attraverso la libreria OSMnx. Per ogni località specificata, viene generato un grafo stradale dettagliato tramite la funzione `ox.graph_from_place()`, che cattura l'intera rete viaria con attributi come lunghezza degli archi e limiti di velocità. Un passaggio cruciale di preprocessing normalizza il parametro `maxspeed`, gestendo casi particolari come valori multipli (es. "30;40 mph") o formati non standard attraverso un sistema di fallback che garantisce sempre un valore numerico valido. Il peso degli archi viene calcolato come rapporto tra lunghezza fisica e velocità massima, creando una metrica di costo temporale realistica per la navigazione.
-
-## 2. Implementazione degli Algoritmi a Confronto
-I due algoritmi implementati – Dijkstra e A* – condividono una base comune ma divergono strategicamente nell'approccio alla ricerca del percorso ottimale. 
-
-L'algoritmo di **Dijkstra** utilizza una coda a priorità classica, esplorando i nodi in ordine rigoroso di distanza crescente dall'origine. Questo approccio garantisce l'ottimalità del percorso ma comporta un'esplorazione "a cerchi concentrici" che può risultare inefficiente in reti estese. La complessità temporale rimane nell'ordine di O(E + V log V), dove E rappresenta gli archi e V i nodi del grafo.
-
-L'algoritmo **A*** introduce un elemento innovativo attraverso l'euristica geodetica, calcolata tramite la formula di Haversine per la distanza grande cerchio tra nodi. La funzione di valutazione combinata f(n) = g(n) + h(n) permette di orientare strategicamente la ricerca verso la destinazione, riducendo drasticamente il numero di nodi esaminati. L'implementazione sfrutta una doppia struttura dati (open_set e closed_set) per mantenere traccia dello stato di esplorazione, ottimizzando l'uso della memoria.
-
-## 3. Meccanismi di Visualizzazione Dinamica
-Il sistema adotta un approccio multilivello alla visualizzazione, cruciale per l'analisi qualitativa dei risultati. Durante l'esecuzione degli algoritmi, uno styling dinamico modifica in tempo reale l'aspetto degli archi:
-- **Arancione scuro** per archi non visitati
-- **Verde** per archi esplorati
-- **Rosso** per archi attivamente valutati
-- **Bianco** per il percorso ottimale identificato
-
-Terminata l'esecuzione, le heatmap generano visualizzazioni comparative: mappe termiche singole mostrano la frequenza d'uso degli archi per ciascun algoritmo, mentre la sovrapposizione cromatica (rosso per Dijkstra, blu per A*) evidenzia le divergenze strategiche tra i due approcci. L'uso di OpenGL abilita il rendering in real-time anche per grafi con oltre 50,000 nodi, mantenendo fluidità interattiva.
-
-## 4. Gestione e Analisi dei Dati
-Il sistema implementa un robusto framework di metriche prestazionali, registrando per ogni esecuzione:
-- Numero totale di iterazioni
-- Lunghezza effettiva del percorso
-- Frequenza d'uso dei singoli archi stradali
-
-I dati grezzi vengono archiviati in formato CSV per analisi post-hoc, mentre le visualizzazioni vengono esportate come SVG vettoriali, preservando la qualità anche a scale di ingrandimento estreme. Il report finale combina statistiche aggregate e confronti percentuali, evidenziando pattern prestazionali attraverso un'analisi multi-criterio che considera sia parametri algoritmici puri sia caratteristiche geografiche delle reti stradali analizzate.
-
-Questa architettura modulare permette estensioni flessibili, consentendo l'integrazione futura di nuovi algoritmi o metriche di valutazione senza modifiche strutturali al codice base. La separazione chiara tra logica di calcolo, gestione dati e visualizzazione garantisce mantenibilità e scalabilità del sistema.
-
-Risultati Sperimentali
-I test sono stati condotti su diverse città (Parigi, Roma, Berlino, New York, ecc.) con distanze variabili tra i punti di origine e destinazione.
-
-Performance di Dijkstra
-text
-Dijkstra iterations: [4491, 333, 11601, 9008, 4345, 104, 15440, 17762, 35497]
-Dijkstra average iterations: 10953.444444444445
-Performance di A*
-text
-A* iterations: [4188, 329, 11512, 8378, 4053, 95, 14432, 17249, 34900]
-A* average iterations: 10570.666666666666
-Confronto
-L'algoritmo A* ha costantemente superato Dijkstra in termini di efficienza:
-
-Città	Distanza (km)	Dijkstra	A*	Miglioramento
-Parigi	6.77	4491	4188	7.23%
-Piedmont (CA)	2.38	333	329	1.22%
-Torino	6.25	11601	11512	0.77%
-Berlino	9.71	9008	8378	7.52%
-Roma	3.98	4345	4053	7.20%
-Barcellona	0.43	104	95	9.47%
-Madrid	8.70	15440	14432	6.98%
-Londra	10.85	17762	17249	2.97%
-New York	27.01	35497	34900	1.71%
-Perché A* è Migliore
-A* si dimostra superiore a Dijkstra per diversi motivi:
-
-Utilizzo dell'euristica: A* utilizza la conoscenza della posizione dell'obiettivo per guidare la ricerca in modo più efficiente, evitando di esplorare nodi che probabilmente non faranno parte della soluzione.
-
-Pruning del grafo: "L'euristica di solito elimina grandi porzioni dell'albero che Dijkstra farebbe crescere sullo stesso problema". Questo è particolarmente utile in grafi geografici di grandi dimensioni.
-
-Efficienza in grafi complessi: Come dimostrato dalle visualizzazioni, A* valuta meno nodi rispetto all'approccio più esaustivo di Dijkstra, particolarmente in ambienti di navigazione complessi.
-
-Flessibilità su diversi tipi di grafo: A* funziona bene sia su grafi finiti che infiniti, mentre Dijkstra è limitato a grafi finiti.
-
-I risultati empirici confermano i vantaggi teorici: A* ha richiesto in media il 3.8% in meno di iterazioni rispetto a Dijkstra, con picchi di miglioramento fino al 9.47%. Questo vantaggio diventa particolarmente significativo in grafi di grandi dimensioni, come evidenziato dai test su città come New York (27.01 km) e Madrid (8.70 km).
-
-In conclusione, sebbene entrambi gli algoritmi garantiscano percorsi ottimali, A* rappresenta la scelta migliore quando l'efficienza computazionale è importante, soprattutto in applicazioni di navigazione in tempo reale dove una risposta rapida è fondamentale.
-Confronto e Vantaggi di A*
-L’euristica di A* riduce in media il 3.5% dei nodi esplorati rispetto a Dijkstra, con miglioramenti fino al 9.5% su distanze brevi come Barcelona. Questo deriva da:
-
-Orientamento verso il goal: la funzione 
-h
-(
-n
-)
-h(n) guida la ricerca evitando di espandere rami non promettenti.
-
-Minor espansione del grafo: A* esplora un sottoinsieme di nodi sufficienti a trovare il percorso ottimale, mentre Dijkstra cresce radialmente in tutte le direzioni.
-
-Efficienza in tempo reale: in applicazioni di navigazione dinamica o con risorse limitate, il tempo di calcolo ridotto di A* è cruciale per aggiornamenti rapidi del percorso.
-
-In conclusione, entrambi gli algoritmi garantiscono ottimalità, ma A* si dimostra più efficiente nel motion planning su grafi stradali reali grazie all’integrazione di un’euristica informata, riducendo significativamente il numero di iterazioni rispetto al metodo di costo uniforme di Dijkstra.
-
-Conclusioni
-Lo script dimostra che A* supera Dijkstra in efficienza grazie all'euristica geodetica, specialmente in reti stradali complesse. Pur garantendo entrambi percorsi ottimali, A* riduce le iterazioni del 3.48% in media, con picchi del 9.47%, risultando ideale per applicazioni in tempo reale.
+Assignment 02
+Motion planning
+Introduction
+Motion planning is the set of techniques that calculate collision-free paths for a robot or an autonomous vehicle, going from an initial configuration to a final one based on geometric, dynamic and motion‐cost dataIn the context of autonomous vehicles, a motion planning algorithm produces the speed and steering commands that must be sent to the vehicle’s wheels. We can distinguish two types of motion planning:Global motion planning: used to create paths to distant goals on the mapLocal motion planning: used to create paths in the immediate vicinity and avoid obstaclesAmong the classic global motion planning algorithms are Dijkstra and A*.
+Dijkstra Algorithm
+The Dijkstra algorithm finds the minimum‐weight path between a pair of vertices in a directed, weighted graph. It solves the “single‐source shortest‐path” problem by creating a table of information on the best known way to reach each vertex (cost, previous vertex) and improving it until the optimal solution is reached. The basic principle of the algorithm is to initialize all nodes with infinite distance except the source, use a priority queue to always select the node with the minimum distance, and update the distances of its neighbors if a better path is found. Although Dijkstra guarantees the optimal path, in large graphs it visits a high number of nodes, resulting in a high computational cost.
+A* Algorithm
+A* is an informed graph‐search algorithm that finds the least‐cost path from a start node to a goal node by combining the path cost from the start with an admissible estimate of the remaining cost. It maintains a frontier of partial paths and always expands the path whose total estimated cost f(n) = g(n) +
+h(n) is smallest. By tuning the heuristic h(n) , A* smoothly interpolates between uniform‐cost search and greedy best‐first search.
+
+The main difference with Dijkstra is that A* “considers not only how far a node is from the start, but also how close it is to the goal.” This allows A* to “focus on the promising nodes at the frontier and find the optimal path faster than Dijkstra.” To highlight the differences between the two, as a test_set we chose both very large, densely roaded cities and others less extensive with a simpler urban layout.
+Code Analysis
+The code implements a complete system for comparing path‐planning algorithms on real road networks, structured in a logical flow that combines data acquisition, algorithmic processing and advanced visualization. The entire process is divided into four integrated macro‐phases, each with a specific role in ensuring accuracy and efficiency.
+Acquisition and preparation: The heart of the system lies in the integration with OpenStreetMap via the OSMnx library. For each specified location and different algorithms, a detailed road graph is generated using the ox.graph_from_place() function, which captures the entire network. Edge weights are calculated as the ratio between physical length and maximum speed, creating a realistic time‐cost metric for navigation. The important part is the setting of maximum speed because in some edge the max speed is not a number because they have the tag OSM as ‘walk’. To support the testing in implementation phase you can use the args —no-plot to be faster to obtain the final textual report overcoming the plots of the paths.
+Implementation of the algorithm: The two implemented algorithms-Dijkstra and A*-share a common foundation but diverge strategically in their approach to finding the optimal path.Dijkstra and A* use a classic priority queue, exploring nodes in strict order of increasing distance from the source. This approach guarantees path optimality but involves a “concentric‐circle” exploration that can be inefficient in large networks.A* introduces an innovative element through a geodetic heuristic, computed via the Haversine formula for great‐circle distance between nodes. The combined evaluation function f(n) = g(n) + h(n) allows the search to be strategically oriented toward the destination, drastically reducing the number of nodes examined. The implementation leverages a dual data structure (open_set and closed_set) to track exploration state, optimizing memory usage.
+Visualisation: During algorithm execution, dynamic styling modifies the appearance of edges in real time to annotate each algorithm’s path. Once the cycle for a given location is complete, heatmaps generate single and comparative visualizations: single maps show the edges for each algorithm, while the comparative map’s color overlay (red for Dijkstra, blue for A*) highlights the strategic divergences between the two approaches.
+Report generation: The system logs, for each run, the total number of iterations and the actual path length. The final report combines aggregated statistics and percentage comparisons, highlighting performance patterns through a multi‐criteria analysis (distances, steps) comparing the algorithms.
+Experimental Results
+Tests were conducted on various cities (Paris, Rome, Berlin, New York, etc.) with variable distances between origin and destination points.From the comparative images, it is evident that the algorithms converge to the same solutions. This statement is the result of various robustness tests explicitly using two completely different graphs for each algorithm, avoiding buffer and path‐overwrite errors.
+Comparison
+The A* algorithm consistently outperformed Dijkstra in terms of efficiency:
+
+A* proves superior to Dijkstra for several reasons:
+Use of the heuristic: A* uses knowledge of the goal’s position to guide the search more efficiently, avoiding exploring nodes unlikely to be part of the solution.
+Graph pruning: The heuristic typically eliminates large portions of the search tree that Dijkstra would expand on the same problem. This is especially useful in large‐scale geographic graphs.
+Efficiency in complex graphs: As demonstrated by the visualizations, A* evaluates fewer nodes than Dijkstra’s more exhaustive approach, particularly in complex navigation environments.Empirical results confirm theoretical advantages: A* required on average 5% fewer iterations than Dijkstra, with performance gains up to 9.47%. This advantage becomes particularly significant in large graphs, as evidenced by tests on cities like New York (27.01 km) and Madrid (8.70 km), where the difference in the number of steps to converge to a solution is markedly lower.
+Conclusions
+The script demonstrates that A* outperforms Dijkstra in efficiency thanks to the geodetic heuristic, especially in complex road networks. While both guarantee optimal paths, A* reduces iterations by an average of 5%, with peaks of 9.47%, making it ideal for real‐time applications.
