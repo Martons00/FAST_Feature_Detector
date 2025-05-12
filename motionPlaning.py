@@ -71,13 +71,17 @@ def dijkstra(G,orig, dest, plot=False):
                     style_active_edge(G,(edge2[0], edge2[1], 0))
         step += 1
 
-def A_star(G,orig, dest, plot=False):
-    open_set = {orig}
-    closed_set = set()
+import heapq
+
+def A_star(G, orig, dest, plot=False):
+    open_heap = []
     g_score = {node: float("inf") for node in G.nodes}
     g_score[orig] = 0
     f_score = {node: float("inf") for node in G.nodes}
-    f_score[orig] = heuristic(G,orig, dest)  
+    f_score[orig] = heuristic(G, orig, dest)
+
+    heapq.heappush(open_heap, (f_score[orig], orig))
+    closed_set = set()
     step = 0
 
     for node in G.nodes:
@@ -85,38 +89,40 @@ def A_star(G,orig, dest, plot=False):
         G.nodes[node]["distance"] = float("inf")
         G.nodes[node]["previous"] = None
         G.nodes[node]["size"] = 0
-
     for edge in G.edges:
-        style_unvisited_edge(G,edge)
-        
+        style_unvisited_edge(G, edge)
+
     G.nodes[orig]["distance"] = 0
     G.nodes[orig]["size"] = 50
     G.nodes[dest]["size"] = 50
     G.nodes[dest]["visited"] = True
-    G.nodes[dest]["distance"] = 0 
+    G.nodes[dest]["distance"] = 0
 
-    while open_set:
-        current = min(open_set, key=lambda node: f_score[node])
+    while open_heap:
+        current_f, current = heapq.heappop(open_heap)
+        if current in closed_set:
+            continue
         if current == dest:
             print("Iterations:", step)
             return step
-        open_set.remove(current)
+
         closed_set.add(current)
-        for edge in G.out_edges(current):
-            neighbor = edge[1]
+
+        for u, v, k in G.out_edges(current, keys=True):
+            neighbor = v
             if neighbor in closed_set:
                 continue
-            tentative_g_score = g_score[current] + G.edges[(edge[0], edge[1], 0)]["weight"]
-            if neighbor not in open_set:
-                open_set.add(neighbor)
-            elif tentative_g_score >= g_score[neighbor]:
-                continue
-            g_score[neighbor] = tentative_g_score
-            f_score[neighbor] = g_score[neighbor] + heuristic(G,neighbor, dest)
-            G.nodes[neighbor]["previous"] = current
-            style_visited_edge(G,(edge[0], edge[1], 0))
+            tentative_g = g_score[current] + G.edges[(u, v, k)]["weight"]
+            if tentative_g < g_score[neighbor]:
+                g_score[neighbor] = tentative_g
+                f_score[neighbor] = tentative_g + heuristic(G, neighbor, dest)
+                G.nodes[neighbor]["previous"] = current
+                heapq.heappush(open_heap, (f_score[neighbor], neighbor))
+                style_visited_edge(G, (u, v, k))
         step += 1
+
     return step
+
 
 def heuristic(G,node1, node2):
     lat1, lon1 = G.nodes[node1]["y"], G.nodes[node1]["x"]
