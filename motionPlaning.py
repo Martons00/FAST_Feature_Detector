@@ -75,53 +75,86 @@ import heapq
 
 def A_star(G, orig, dest, plot=False):
     open_heap = []
-    g_score = {node: float("inf") for node in G.nodes}
+    g_score = {node: float('inf') for node in G.nodes}
     g_score[orig] = 0
-    f_score = {node: float("inf") for node in G.nodes}
+    f_score = {node: float('inf') for node in G.nodes}
     f_score[orig] = heuristic(G, orig, dest)
+    
+    # Struttura per tracciare le voci attive nell'heap
+    entry_map = {}  # Mappa nodo → [f_score, entry_count, is_valid]
+    entry_count = 0  # Contatore per gestire l'ordinamento in heapq
 
-    heapq.heappush(open_heap, (f_score[orig], orig))
+    # Inserimento iniziale
+    entry = [f_score[orig], entry_count, orig]
+    heapq.heappush(open_heap, entry)
+    entry_map[orig] = entry
+    entry_count += 1
+
     closed_set = set()
     step = 0
 
+    # Inizializzazione attributi (come prima)
     for node in G.nodes:
         G.nodes[node]["visited"] = False
-        G.nodes[node]["distance"] = float("inf")
+        G.nodes[node]["distance"] = float('inf')
         G.nodes[node]["previous"] = None
         G.nodes[node]["size"] = 0
+    
     for edge in G.edges:
         style_unvisited_edge(G, edge)
 
     G.nodes[orig]["distance"] = 0
     G.nodes[orig]["size"] = 50
     G.nodes[dest]["size"] = 50
-    G.nodes[dest]["visited"] = True
-    G.nodes[dest]["distance"] = 0
 
     while open_heap:
-        current_f, current = heapq.heappop(open_heap)
-        if current in closed_set:
+        current_f, count, current = heapq.heappop(open_heap)
+        
+        # Controlla se la voce è ancora valida
+        if current not in entry_map or entry_map[current][0] < current_f:
             continue
+            
+        del entry_map[current]
+        
         if current == dest:
             print("Iterations:", step)
             return step
 
         closed_set.add(current)
+        G.nodes[current]["visited"] = True
+        step += 1  # Incrementa SOLO quando processi effettivamente un nodo
 
         for u, v, k in G.out_edges(current, keys=True):
             neighbor = v
             if neighbor in closed_set:
                 continue
-            tentative_g = g_score[current] + G.edges[(u, v, k)]["weight"]
+                
+            edge_weight = G.edges[(u, v, k)].get("weight", float('inf'))
+            tentative_g = g_score[current] + edge_weight
+            
             if tentative_g < g_score[neighbor]:
                 g_score[neighbor] = tentative_g
-                f_score[neighbor] = tentative_g + heuristic(G, neighbor, dest)
+                new_f = tentative_g + heuristic(G, neighbor, dest)
+                
+                # Aggiorna solo se migliora il best score
+                if neighbor in entry_map:
+                    old_f = entry_map[neighbor][0]
+                    if new_f >= old_f:
+                        continue
+                    entry_map[neighbor][2] = 'REMOVED'  # Invalida la vecchia entry
+                
+                # Crea nuova entry
+                entry = [new_f, entry_count, neighbor]
+                entry_count += 1
+                heapq.heappush(open_heap, entry)
+                entry_map[neighbor] = entry
+                
                 G.nodes[neighbor]["previous"] = current
-                heapq.heappush(open_heap, (f_score[neighbor], neighbor))
+                G.nodes[neighbor]["distance"] = tentative_g
                 style_visited_edge(G, (u, v, k))
-        step += 1
 
     return step
+
 
 
 def heuristic(G,node1, node2):
@@ -147,6 +180,7 @@ def reconstruct_path(G,orig, dest, plot=False, algorithm=None):
             G.edges[(prev, curr, 0)][f"{algorithm}_uses"] = G.edges[(prev, curr, 0)].get(f"{algorithm}_uses", 0) + 1
         curr = prev
     dist /= 1000
+    return dist
 
 def plot_heatmap(G, algorithm, place_name=None):
     fig, ax = ox.plot_graph(
@@ -260,12 +294,18 @@ if __name__ == "__main__":
     interations_A_star = []
     interations_Dijkstra = []  
     distaces = []
+    number_of_nodes = []
+    number_of_edges = []
+    number_of_edges_algorithm = []
 
 
     for place_name in place_names:
         print("Place:", place_name)
         G = ox.graph_from_place(place_name, network_type="drive")
-            
+        number_of_nodes.append(len(G.nodes))
+        number_of_edges.append(len(G.edges))
+        print("Number of nodes:", len(G.nodes))
+        print("Number of edges:", len(G.edges))
         for edge in G.edges:
             maxspeed = 40
             
@@ -296,19 +336,22 @@ if __name__ == "__main__":
             length = G.edges[edge].get("length", 1)
             G.edges[edge]["weight"] = length / maxspeed if maxspeed > 0 else float("inf")
 
+        
         for edge in G.edges:
             G.edges[edge]["dijkstra_uses"] = 0
 
         start = random.choice(list(G.nodes))
         end = random.choice(list(G.nodes))
-        distaces.append(heuristic(G,start,end))
 
         print("Running Dijkstra")
         step_D = dijkstra(G, start, end, plot=args.plot)
         interations_Dijkstra.append(step_D)
         print("Done")
 
-        reconstruct_path(G, start, end, algorithm="dijkstra", plot=args.plot)
+        dist_D = reconstruct_path(G, start, end, algorithm="dijkstra", plot=args.plot)
+        print("Distance Dijkstra:", dist_D)
+        print("Dijkstra edge in path:", len([edge for edge in G.edges if G.edges[edge].get("dijkstra_uses", 0) > 0]))
+
 
         F = ox.graph_from_place(place_name, network_type="drive")
 
@@ -351,7 +394,11 @@ if __name__ == "__main__":
         interations_A_star.append(step_A)
         print("Done")
 
-        reconstruct_path(F, start, end, algorithm="A_star", plot=args.plot)
+        dist_A= reconstruct_path(F, start, end, algorithm="A_star", plot=args.plot)
+        distaces.append(dist_A)
+        print("Distance A*:", dist_A)
+        print("A* edge in path:", len([edge for edge in F.edges if F.edges[edge].get("A_star_uses", 0) > 0]))
+        number_of_edges_algorithm.append(len([edge for edge in F.edges if F.edges[edge].get("A_star_uses", 0) > 0]))
         
         if args.plot:
             plot_heatmap(G, "dijkstra", place_name)
@@ -366,10 +413,15 @@ if __name__ == "__main__":
                 if interations_A_star[i] != 0 
                 else "A* non ha completato, confronto non possibile.\n"
             )
+            information = (
+                f"Number of nodes: {number_of_nodes[i]}, Number of edges: {number_of_edges[i]}, Number of edges algorithm: {number_of_edges_algorithm[i]}\n"
+            )
             print(result.strip())
             print(comparison.strip())
             file.write(result)
             file.write(comparison)
+            print(information.strip())
+            file.write(information)
             file.write("\n")
         dijkstra_iterations = f"Dijkstra iterations: {interations_Dijkstra}\n"
         a_star_iterations = f"A* iterations: {interations_A_star}\n"
