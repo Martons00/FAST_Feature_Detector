@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import geopandas as gpd
 import pandas as pd
 
+MAX_SPEED = 40
 
 def style_unvisited_edge(G, edge):        
     G.edges[edge]["color"] = "#d36206"
@@ -157,10 +158,11 @@ def A_star(G, orig, dest, plot=False):
 
 
 
+
 def heuristic(G,node1, node2):
     lat1, lon1 = G.nodes[node1]["y"], G.nodes[node1]["x"]
     lat2, lon2 = G.nodes[node2]["y"], G.nodes[node2]["x"]
-    return ox.distance.great_circle(lat1, lon1, lat2, lon2) / 1000 
+    return ox.distance.great_circle(lat1, lon1, lat2, lon2) / MAX_SPEED 
 
 
 
@@ -182,30 +184,43 @@ def reconstruct_path(G,orig, dest, plot=False, algorithm=None):
     dist /= 1000
     return dist
 
-def plot_heatmap(G, algorithm, place_name=None):
-    fig, ax = ox.plot_graph(
-        G,
-        node_size=[G.nodes[n]["size"] for n in G.nodes],
-        edge_alpha=[G.edges[e]["alpha"] for e in G.edges],
-        edge_linewidth=[G.edges[e]["linewidth"] for e in G.edges],
-        bgcolor="#18080e",
-        show=False,
-        close=False
+def plot_heatmap(G, algorithm, place_name=None, save=True, figsize=(10, 10), cmap="Reds"):
+    nodes, edges = ox.graph_to_gdfs(G, nodes=True, edges=True)
+
+    fig, ax = plt.subplots(figsize=figsize)
+    fig.patch.set_facecolor("#18080e")
+    ax.set_facecolor("#18080e")
+    ax.axis("off")
+
+    edges.plot(
+        ax=ax,
+        column=f"{algorithm}_uses" if f"{algorithm}_uses" in edges.columns else None,
+        cmap=cmap,
+        linewidth=edges.get("linewidth", 1),
+        alpha=edges.get("alpha", 0.7),
+        legend=False
     )
+
+    nodes.plot(
+        ax=ax,
+        markersize=nodes.get("size", 10),
+        color="white",
+        alpha=1
+    )
+
     title = f"Heatmap for {algorithm}"
     if place_name:
-        title += f" - {place_name}"
-    ax.set_title(title, fontsize=16, color="white")
+        title += f" – {place_name}"
+    ax.set_title(title, color="white", fontsize=16)
+    
+    if save:
+        results_dir = os.path.join(os.path.dirname(__file__), "results")
+        os.makedirs(results_dir, exist_ok=True)
+        key = place_name.replace(", ", "_").replace(" ", "_") if place_name else "heatmap"
+        outpath = os.path.join(results_dir, f"{key}_{algorithm}_heatmap.png")
+        fig.savefig(outpath, dpi=300, bbox_inches="tight", facecolor=fig.get_facecolor())
 
-    results_dir = os.path.join(os.path.dirname(__file__), "results")
-    os.makedirs(results_dir, exist_ok=True)
-    key = place_name.replace(", ", "_").replace(" ", "_") if place_name else "heatmap"
-    fig.savefig(
-        os.path.join(results_dir, f"{key}_{algorithm}_heatmap.png"),
-        dpi=300, bbox_inches="tight"
-    )
-
-    plt.show()
+    #plt.show()
     plt.close(fig)
 
     
@@ -265,7 +280,7 @@ def plot_overlay_heatmap(G, F,
         )
         fig.savefig(outpath, dpi=300, bbox_inches="tight", facecolor=fig.get_facecolor())
 
-    plt.show()
+    #plt.show()
     plt.close(fig)
     
 
@@ -307,7 +322,7 @@ if __name__ == "__main__":
         print("Number of nodes:", len(G.nodes))
         print("Number of edges:", len(G.edges))
         for edge in G.edges:
-            maxspeed = 40
+            maxspeed = MAX_SPEED
             
             if "maxspeed" in G.edges[edge] and G.edges[edge]["maxspeed"] is not None:
                 raw = G.edges[edge]["maxspeed"]
@@ -401,9 +416,10 @@ if __name__ == "__main__":
         number_of_edges_algorithm.append(len([edge for edge in F.edges if F.edges[edge].get("A_star_uses", 0) > 0]))
         
         if args.plot:
-            plot_heatmap(G, "dijkstra", place_name)
-            plot_heatmap(F, "A_star", place_name)
+            plot_heatmap(G, "dijkstra", place_name, save=args.plot)
+            plot_heatmap(F, "A_star", place_name, save=args.plot)
             plot_overlay_heatmap(G, F, "dijkstra", "A_star", place_name=place_name, save=args.plot, figsize=(20, 10), cmap1="Reds", cmap2="Blues")
+            
 
     with open("results.txt", "w") as file:
         for i in range(len(place_names)):

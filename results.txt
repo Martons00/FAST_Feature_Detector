@@ -1,42 +1,51 @@
-Place: Paris, France, Distance 6.77km 
-Dijkstra: 4491, A*: 4188
-Dijkstra e' 7.23% piu' lento di A*
+Place: Paris, France, Distance 12.09km 
+Dijkstra: 8667, A*: 3021
+Dijkstra e' 186.89% piu' lento di A*
+Number of nodes: 9477, Number of edges: 18223, Number of edges algorithm: 102
 
-Place: Piedmont, California, USA, Distance 2.38km 
-Dijkstra: 333, A*: 329
-Dijkstra e' 1.22% piu' lento di A*
+Place: Piedmont, California, USA, Distance 3.20km 
+Dijkstra: 286, A*: 147
+Dijkstra e' 94.56% piu' lento di A*
+Number of nodes: 352, Number of edges: 944, Number of edges algorithm: 35
 
-Place: Turin, Piedmont, Italy, Distance 6.25km 
-Dijkstra: 11601, A*: 11512
-Dijkstra e' 0.77% piu' lento di A*
+Place: Turin, Piedmont, Italy, Distance 9.08km 
+Dijkstra: 8278, A*: 618
+Dijkstra e' 1239.48% piu' lento di A*
+Number of nodes: 12001, Number of edges: 25795, Number of edges algorithm: 103
 
-Place: Berlin, Germany, Distance 9.71km 
-Dijkstra: 9008, A*: 8378
-Dijkstra e' 7.52% piu' lento di A*
+Place: Berlin, Germany, Distance 20.86km 
+Dijkstra: 21620, A*: 1746
+Dijkstra e' 1138.26% piu' lento di A*
+Number of nodes: 28221, Number of edges: 73368, Number of edges algorithm: 169
 
-Place: Rome, Italy, Distance 3.98km 
-Dijkstra: 4345, A*: 4053
-Dijkstra e' 7.20% piu' lento di A*
+Place: Rome, Italy, Distance 36.41km 
+Dijkstra: 42620, A*: 1723
+Dijkstra e' 2373.59% piu' lento di A*
+Number of nodes: 43560, Number of edges: 90244, Number of edges algorithm: 101
 
-Place: Barcelona, Spain, Distance 0.43km 
-Dijkstra: 104, A*: 95
-Dijkstra e' 9.47% piu' lento di A*
+Place: Barcelona, Spain, Distance 8.03km 
+Dijkstra: 5475, A*: 422
+Dijkstra e' 1197.39% piu' lento di A*
+Number of nodes: 8865, Number of edges: 16445, Number of edges algorithm: 96
 
-Place: Madrid, Spain, Distance 8.70km 
-Dijkstra: 15440, A*: 14432
-Dijkstra e' 6.98% piu' lento di A*
+Place: Madrid, Spain, Distance 8.22km 
+Dijkstra: 15585, A*: 576
+Dijkstra e' 2605.73% piu' lento di A*
+Number of nodes: 31087, Number of edges: 61222, Number of edges algorithm: 100
 
-Place: London, England, Distance 10.85km 
-Dijkstra: 17762, A*: 17249
-Dijkstra e' 2.97% piu' lento di A*
+Place: London, England, Distance 2.77km 
+Dijkstra: 836, A*: 222
+Dijkstra e' 276.58% piu' lento di A*
+Number of nodes: 129223, Number of edges: 301159, Number of edges algorithm: 39
 
-Place: New York City, New York, USA, Distance 27.01km 
-Dijkstra: 35497, A*: 34900
-Dijkstra e' 1.71% piu' lento di A*
+Place: New York City, New York, USA, Distance 19.29km 
+Dijkstra: 25462, A*: 3682
+Dijkstra e' 591.53% piu' lento di A*
+Number of nodes: 55246, Number of edges: 139286, Number of edges algorithm: 120
 
 
 --------------------------------
-Dijkstra iterations: [4491, 333, 11601, 9008, 4345, 104, 15440, 17762, 35497]
-A* iterations: [4188, 329, 11512, 8378, 4053, 95, 14432, 17249, 34900]
-Dijkstra average iterations: 10953.444444444445
-A* average iterations: 10570.666666666666
+Dijkstra iterations: [8667, 286, 8278, 21620, 42620, 5475, 15585, 836, 25462]
+A* iterations: [3021, 147, 618, 1746, 1723, 422, 576, 222, 3682]
+Dijkstra average iterations: 14314.333333333334
+A* average iterations: 1350.7777777777778
