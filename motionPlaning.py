@@ -56,7 +56,7 @@ def dijkstra(G,orig, dest, plot=False):
     while pq:
         _, node = heapq.heappop(pq)
         if node == dest:
-            print("Iterations:", step)
+            print("Iterations of the alg:", step)
             return step
         if G.nodes[node]["visited"]: continue
         G.nodes[node]["visited"] = True
@@ -118,7 +118,7 @@ def A_star(G, orig, dest, plot=False):
         del entry_map[current]
         
         if current == dest:
-            print("Iterations:", step)
+            print("Iterations of the alg:", step)
             return step
 
         closed_set.add(current)
@@ -315,130 +315,139 @@ if __name__ == "__main__":
 
 
     for place_name in place_names:
-        print("Place:", place_name)
         G = ox.graph_from_place(place_name, network_type="drive")
+        F = ox.graph_from_place(place_name, network_type="drive")
         number_of_nodes.append(len(G.nodes))
         number_of_edges.append(len(G.edges))
+        print("Place:", place_name)
         print("Number of nodes:", len(G.nodes))
         print("Number of edges:", len(G.edges))
-        for edge in G.edges:
-            maxspeed = MAX_SPEED
-            
-            if "maxspeed" in G.edges[edge] and G.edges[edge]["maxspeed"] is not None:
-                raw = G.edges[edge]["maxspeed"]
+        for i in range(3):
+            print("Iteration on this city :", i)
+            print("\n")
+            for edge in G.edges:
+                maxspeed = MAX_SPEED
                 
-                if isinstance(raw, list):
-                    speeds = []
-                    for s in raw:
+                if "maxspeed" in G.edges[edge] and G.edges[edge]["maxspeed"] is not None:
+                    raw = G.edges[edge]["maxspeed"]
+                    
+                    if isinstance(raw, list):
+                        speeds = []
+                        for s in raw:
+                            try:
+                                speeds.append(int(s))
+                            except (ValueError, TypeError):
+                                pass
+                        if speeds:
+                            maxspeed = min(speeds)
+                    
+                    elif isinstance(raw, str):
+                        s = raw.lower().replace("mph", "").strip()
                         try:
-                            speeds.append(int(s))
-                        except (ValueError, TypeError):
+                            maxspeed = int(s)
+                        except ValueError:
                             pass
-                    if speeds:
-                        maxspeed = min(speeds)
-                
-                elif isinstance(raw, str):
-                    s = raw.lower().replace("mph", "").strip()
-                    try:
-                        maxspeed = int(s)
-                    except ValueError:
-                        pass
-                
-                elif isinstance(raw, (int, float)):
-                    maxspeed = int(raw)
-                
-            G.edges[edge]["maxspeed"] = maxspeed
-            length = G.edges[edge].get("length", 1)
-            G.edges[edge]["weight"] = length / maxspeed if maxspeed > 0 else float("inf")
+                    
+                    elif isinstance(raw, (int, float)):
+                        maxspeed = int(raw)
+                    
+                G.edges[edge]["maxspeed"] = maxspeed
+                length = G.edges[edge].get("length", 1)
+                G.edges[edge]["weight"] = length / maxspeed if maxspeed > 0 else float("inf")
 
-        
-        for edge in G.edges:
-            G.edges[edge]["dijkstra_uses"] = 0
-
-        start = random.choice(list(G.nodes))
-        end = random.choice(list(G.nodes))
-
-        print("Running Dijkstra")
-        step_D = dijkstra(G, start, end, plot=args.plot)
-        interations_Dijkstra.append(step_D)
-        print("Done")
-
-        dist_D = reconstruct_path(G, start, end, algorithm="dijkstra", plot=args.plot)
-        print("Distance Dijkstra:", dist_D)
-        print("Dijkstra edge in path:", len([edge for edge in G.edges if G.edges[edge].get("dijkstra_uses", 0) > 0]))
-
-
-        F = ox.graph_from_place(place_name, network_type="drive")
-
-        for edge in F.edges:
-            maxspeed = 40
             
-            if "maxspeed" in F.edges[edge] and F.edges[edge]["maxspeed"] is not None:
-                raw = F.edges[edge]["maxspeed"]
+            for edge in G.edges:
+                G.edges[edge]["dijkstra_uses"] = 0
+
+            start = random.choice(list(G.nodes))
+            end = random.choice(list(G.nodes))
+
+            print("Running Dijkstra")
+            step_D = dijkstra(G, start, end, plot=args.plot)
+            interations_Dijkstra.append(step_D)
+
+            dist_D = reconstruct_path(G, start, end, algorithm="dijkstra", plot=args.plot)
+            print("Distance Dijkstra:", dist_D)
+            print("Dijkstra edge in path:", len([edge for edge in G.edges if G.edges[edge].get("dijkstra_uses", 0) > 0]))
+            print("Done \n ")
+
+
+
+            for edge in F.edges:
+                maxspeed = 40
                 
-                if isinstance(raw, list):
-                    speeds = []
-                    for s in raw:
+                if "maxspeed" in F.edges[edge] and F.edges[edge]["maxspeed"] is not None:
+                    raw = F.edges[edge]["maxspeed"]
+                    
+                    if isinstance(raw, list):
+                        speeds = []
+                        for s in raw:
+                            try:
+                                speeds.append(int(s))
+                            except (ValueError, TypeError):
+                                pass
+                        if speeds:
+                            maxspeed = min(speeds)
+                    
+                    elif isinstance(raw, str):
+                        s = raw.lower().replace("mph", "").strip()
                         try:
-                            speeds.append(int(s))
-                        except (ValueError, TypeError):
+                            maxspeed = int(s)
+                        except ValueError:
                             pass
-                    if speeds:
-                        maxspeed = min(speeds)
+                    
+                    elif isinstance(raw, (int, float)):
+                        maxspeed = int(raw)
                 
-                elif isinstance(raw, str):
-                    s = raw.lower().replace("mph", "").strip()
-                    try:
-                        maxspeed = int(s)
-                    except ValueError:
-                        pass
-                
-                elif isinstance(raw, (int, float)):
-                    maxspeed = int(raw)
+                F.edges[edge]["maxspeed"] = maxspeed
+                length = F.edges[edge].get("length", 1)
+                F.edges[edge]["weight"] = length / maxspeed if maxspeed > 0 else float("inf")
+
+            for edge in F.edges:
+                F.edges[edge]["A_star_uses"] = 0
+
             
-            F.edges[edge]["maxspeed"] = maxspeed
-            length = F.edges[edge].get("length", 1)
-            F.edges[edge]["weight"] = length / maxspeed if maxspeed > 0 else float("inf")
+            print("Running A*")
+            step_A = A_star(F, start, end, plot=args.plot)
+            interations_A_star.append(step_A)
 
-        for edge in F.edges:
-            F.edges[edge]["A_star_uses"] = 0
+            dist_A= reconstruct_path(F, start, end, algorithm="A_star", plot=args.plot)
+            distaces.append(dist_A)
+            print("Distance A*:", dist_A)
+            print("A* edge in path:", len([edge for edge in F.edges if F.edges[edge].get("A_star_uses", 0) > 0]))
+            number_of_edges_algorithm.append(len([edge for edge in F.edges if F.edges[edge].get("A_star_uses", 0) > 0]))
+            print("Done \n ")
 
+            
+            if args.plot:
+                name_place = place_name + str(i)
+                plot_heatmap(G, "dijkstra", name_place , save=args.plot)
+                plot_heatmap(F, "A_star", name_place, save=args.plot)
+                plot_overlay_heatmap(G, F, "dijkstra", "A_star", place_name=name_place, save=args.plot, figsize=(20, 10), cmap1="Reds", cmap2="Blues")
         
-        print("Running A*")
-        step_A = A_star(F, start, end, plot=args.plot)
-        interations_A_star.append(step_A)
-        print("Done")
-
-        dist_A= reconstruct_path(F, start, end, algorithm="A_star", plot=args.plot)
-        distaces.append(dist_A)
-        print("Distance A*:", dist_A)
-        print("A* edge in path:", len([edge for edge in F.edges if F.edges[edge].get("A_star_uses", 0) > 0]))
-        number_of_edges_algorithm.append(len([edge for edge in F.edges if F.edges[edge].get("A_star_uses", 0) > 0]))
         
-        if args.plot:
-            plot_heatmap(G, "dijkstra", place_name, save=args.plot)
-            plot_heatmap(F, "A_star", place_name, save=args.plot)
-            plot_overlay_heatmap(G, F, "dijkstra", "A_star", place_name=place_name, save=args.plot, figsize=(20, 10), cmap1="Reds", cmap2="Blues")
+        print("------------------------------------------------------")
             
 
     with open("results.txt", "w") as file:
         for i in range(len(place_names)):
-            result = f"Place: {place_names[i]}, Distance {(distaces[i]):.2f}km \nDijkstra: {interations_Dijkstra[i]}, A*: {interations_A_star[i]}\n"
-            comparison = (
-                f"Dijkstra e' {((interations_Dijkstra[i] - interations_A_star[i]) * 100 / interations_A_star[i]):.2f}% piu' lento di A*\n"
-                if interations_A_star[i] != 0 
-                else "A* non ha completato, confronto non possibile.\n"
-            )
-            information = (
-                f"Number of nodes: {number_of_nodes[i]}, Number of edges: {number_of_edges[i]}, Number of edges algorithm: {number_of_edges_algorithm[i]}\n"
-            )
-            print(result.strip())
-            print(comparison.strip())
-            file.write(result)
-            file.write(comparison)
-            print(information.strip())
-            file.write(information)
-            file.write("\n")
+            for j in range(3):
+                result = f"Place: {place_names[i]}, Iteration: {j}, Distance {(distaces[i]):.2f}km \nDijkstra: {interations_Dijkstra[i]}, A*: {interations_A_star[i]}\n"
+                comparison = (
+                    f"Dijkstra e' {((interations_Dijkstra[i] - interations_A_star[i]) * 100 / interations_A_star[i]):.2f}% piu' lento di A*\n"
+                    if interations_A_star[i] != 0 
+                    else "A* non ha completato, confronto non possibile.\n"
+                )
+                information = (
+                    f"Number of nodes: {number_of_nodes[i]}, Number of edges: {number_of_edges[i]}, Number of edges algorithm: {number_of_edges_algorithm[i]}\n"
+                )
+                print(result.strip())
+                print(comparison.strip())
+                file.write(result)
+                file.write(comparison)
+                print(information.strip())
+                file.write(information)
+                file.write("\n")
         dijkstra_iterations = f"Dijkstra iterations: {interations_Dijkstra}\n"
         a_star_iterations = f"A* iterations: {interations_A_star}\n"
         dijkstra_avg = f"Dijkstra average iterations: {sum(interations_Dijkstra) / len(interations_Dijkstra)}\n"
