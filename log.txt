@@ -1,0 +1,572 @@
+PS C:\Users\juve2\Desktop\Projects\FAST_Feature_Detector> python .\motionPlaning.py
+Number of nodes: 9477
+Number of edges: 18223
+Place: Paris, France
+Iteration on this city : 0
+
+
+Running Dijkstra
+Iterations of the alg: 4591
+Distance Dijkstra: 9.706391932668852
+Dijkstra edge in path: 82
+Done 
+ 
+Running A*
+Iterations of the alg: 1424
+Distance A*: 9.706391932668852
+A* edge in path: 82
+Done 
+ 
+Place: Paris, France
+Iteration on this city : 1
+
+
+Running Dijkstra
+Iterations of the alg: 9170
+Distance Dijkstra: 9.042032811382002
+Dijkstra edge in path: 109
+Done
+
+Running A*
+Iterations of the alg: 3242
+Distance A*: 9.042032811382002
+A* edge in path: 109
+Done 
+
+Place: Paris, France
+Iteration on this city : 2
+
+
+Running Dijkstra
+Iterations of the alg: 7893
+Distance Dijkstra: 9.300639964404208
+Dijkstra edge in path: 81
+Done
+
+Running A*
+Iterations of the alg: 2080
+Distance A*: 9.300639964404208
+A* edge in path: 81
+Done 
+
+------------------------------------------------------
+Number of nodes: 352
+Number of edges: 944
+Place: Piedmont, California, USA
+Iteration on this city : 0
+
+
+Running Dijkstra
+Iterations of the alg: 325
+Distance Dijkstra: 4.117335876539892
+Dijkstra edge in path: 42
+Done
+
+Running A*
+Iterations of the alg: 298
+Distance A*: 4.117335876539892
+A* edge in path: 42
+Done
+
+Place: Piedmont, California, USA
+Iteration on this city : 1
+
+
+Running Dijkstra
+Iterations of the alg: 211
+Distance Dijkstra: 1.702211307342576
+Dijkstra edge in path: 12
+Done
+
+Running A*
+Iterations of the alg: 79
+Distance A*: 1.702211307342576
+A* edge in path: 12
+Done
+
+Place: Piedmont, California, USA
+Iteration on this city : 2
+
+
+Running Dijkstra
+Iterations of the alg: 261
+Distance Dijkstra: 2.082791725036129
+Dijkstra edge in path: 27
+Done
+
+Running A*
+Iterations of the alg: 115
+Distance A*: 2.2558168816882036
+A* edge in path: 22
+Done
+
+------------------------------------------------------
+Number of nodes: 12001
+Number of edges: 25795
+Place: Turin, Piedmont, Italy
+Iteration on this city : 0
+
+
+Running Dijkstra
+Iterations of the alg: 1606
+Distance Dijkstra: 2.3406072849038977
+Dijkstra edge in path: 53
+Done
+
+Running A*
+Iterations of the alg: 238
+Distance A*: 2.3406072849038977
+A* edge in path: 53
+Done 
+
+Place: Turin, Piedmont, Italy
+Iteration on this city : 1
+
+
+Running Dijkstra
+Iterations of the alg: 5862
+Distance Dijkstra: 4.333417947569495
+Dijkstra edge in path: 68
+Done
+
+Running A*
+Iterations of the alg: 625
+Distance A*: 4.333417947569495
+A* edge in path: 68
+Done 
+
+Place: Turin, Piedmont, Italy
+Iteration on this city : 2
+
+
+Running Dijkstra
+Iterations of the alg: 1866
+Distance Dijkstra: 3.0327157656222288
+Dijkstra edge in path: 30
+Done
+
+Running A*
+Iterations of the alg: 101
+Distance A*: 3.016622047637924
+A* edge in path: 40
+Done 
+
+------------------------------------------------------
+Number of nodes: 28221
+Number of edges: 73368
+Place: Berlin, Germany
+Iteration on this city : 0
+
+
+Running Dijkstra
+Iterations of the alg: 11498
+Distance Dijkstra: 15.316257274522378
+Dijkstra edge in path: 64
+Done 
+
+Running A*
+Iterations of the alg: 377
+Distance A*: 13.80665754411079
+A* edge in path: 122
+Done 
+
+Place: Berlin, Germany
+Iteration on this city : 1
+
+
+Running Dijkstra
+Iterations of the alg: 27621
+Distance Dijkstra: 44.4948585607006
+Dijkstra edge in path: 118
+Done 
+
+Running A*
+Iterations of the alg: 4017
+Distance A*: 34.43480883017835
+A* edge in path: 210
+Done 
+
+Place: Berlin, Germany
+Iteration on this city : 2
+
+
+Running Dijkstra
+Iterations of the alg: 22256
+Distance Dijkstra: 21.310157409561214
+Dijkstra edge in path: 91
+Done 
+
+Running A*
+Iterations of the alg: 383
+Distance A*: 19.138368182967547
+A* edge in path: 156
+Done 
+
+------------------------------------------------------
+Number of nodes: 43560
+Number of edges: 90244
+Place: Rome, Italy
+Iteration on this city : 0
+
+
+Running Dijkstra
+Iterations of the alg: 2926
+Distance Dijkstra: 5.286298123555857
+Dijkstra edge in path: 50
+Done 
+
+Running A*
+Iterations of the alg: 355
+Distance A*: 5.335315994420531
+A* edge in path: 54
+Done 
+
+Place: Rome, Italy
+Iteration on this city : 1
+
+
+Running Dijkstra
+Iterations of the alg: 11375
+Distance Dijkstra: 8.77716607851103
+Dijkstra edge in path: 93
+Done 
+
+Running A*
+Iterations of the alg: 613
+Distance A*: 8.784009393562393
+A* edge in path: 95
+Done 
+
+Place: Rome, Italy
+Iteration on this city : 2
+
+
+Running Dijkstra
+Iterations of the alg: 2631
+Distance Dijkstra: 4.869958361507696
+Dijkstra edge in path: 73
+Done 
+
+Running A*
+Iterations of the alg: 281
+Distance A*: 4.869958361507696
+A* edge in path: 73
+Done 
+
+------------------------------------------------------
+Number of nodes: 8865
+Number of edges: 16445
+Place: Barcelona, Spain
+Iteration on this city : 0
+
+
+Running Dijkstra
+Iterations of the alg: 7079
+Distance Dijkstra: 6.116721938933751
+Dijkstra edge in path: 50
+Done
+
+Running A*
+Iterations of the alg: 2772
+Distance A*: 6.116721938933751
+A* edge in path: 50
+Done 
+
+Place: Barcelona, Spain
+Iteration on this city : 1
+
+
+Running Dijkstra
+Iterations of the alg: 6094
+Distance Dijkstra: 6.621768732787086
+Dijkstra edge in path: 63
+Done
+
+Running A*
+Iterations of the alg: 308
+Distance A*: 6.639696873215881
+A* edge in path: 65
+Done 
+
+Place: Barcelona, Spain
+Iteration on this city : 2
+
+
+Running Dijkstra
+Iterations of the alg: 3253
+Distance Dijkstra: 5.5107313351784635
+Dijkstra edge in path: 58
+Done
+
+Running A*
+Iterations of the alg: 144
+Distance A*: 5.5107313351784635
+A* edge in path: 58
+Done 
+
+------------------------------------------------------
+Number of nodes: 31087
+Number of edges: 61222
+Place: Madrid, Spain
+Iteration on this city : 0
+
+
+Running Dijkstra
+Iterations of the alg: 26598
+Distance Dijkstra: 26.05031966589402
+Dijkstra edge in path: 68
+Done 
+
+Running A*
+Iterations of the alg: 705
+Distance A*: 24.723618779078752
+A* edge in path: 88
+Done 
+
+Place: Madrid, Spain
+Iteration on this city : 1
+
+
+Running Dijkstra
+Iterations of the alg: 2507
+Distance Dijkstra: 4.95037755733181
+Dijkstra edge in path: 53
+Done 
+
+Running A*
+Iterations of the alg: 546
+Distance A*: 4.814396791555934
+A* edge in path: 52
+Done 
+
+Place: Madrid, Spain
+Iteration on this city : 2
+
+
+Running Dijkstra
+Iterations of the alg: 11886
+Distance Dijkstra: 12.944340567687263
+Dijkstra edge in path: 131
+Done 
+
+Running A*
+Iterations of the alg: 608
+Distance A*: 12.936264713122334
+A* edge in path: 131
+Done 
+
+------------------------------------------------------
+Number of nodes: 129223
+Number of edges: 301159
+Place: London, England
+Iteration on this city : 0
+
+
+Running Dijkstra
+Iterations of the alg: 5743
+Distance Dijkstra: 4.9381237784172916
+Dijkstra edge in path: 71
+Done 
+
+Running A*
+Iterations of the alg: 2155
+Distance A*: 4.9381237784172916
+A* edge in path: 71
+Done 
+
+Place: London, England
+Iteration on this city : 1
+
+
+Running Dijkstra
+Iterations of the alg: 93319
+Distance Dijkstra: 41.30409733476479
+Dijkstra edge in path: 219
+Done 
+
+Running A*
+Iterations of the alg: 35899
+Distance A*: 41.30409733476479
+A* edge in path: 219
+Done 
+
+Place: London, England
+Iteration on this city : 2
+
+
+Running Dijkstra
+Iterations of the alg: 68979
+Distance Dijkstra: 38.660758019390194
+Dijkstra edge in path: 217
+Done 
+
+Running A*
+Iterations of the alg: 21751
+Distance A*: 38.660758019390194
+A* edge in path: 217
+Done 
+
+------------------------------------------------------
+Number of nodes: 55246
+Number of edges: 139286
+Place: New York City, New York, USA
+Iteration on this city : 0
+
+
+Running Dijkstra
+Iterations of the alg: 54104
+Distance Dijkstra: 61.462783308973684
+Dijkstra edge in path: 223
+Done 
+
+Running A*
+Iterations of the alg: 23354
+Distance A*: 60.172877270435116
+A* edge in path: 261
+Done 
+
+Place: New York City, New York, USA
+Iteration on this city : 1
+
+
+Running Dijkstra
+Iterations of the alg: 14346
+Distance Dijkstra: 12.58171377285501
+Dijkstra edge in path: 157
+Done 
+
+Running A*
+Iterations of the alg: 3037
+Distance A*: 12.58171377285501
+A* edge in path: 157
+Done 
+
+Place: New York City, New York, USA
+Iteration on this city : 2
+
+
+Running Dijkstra
+Iterations of the alg: 12041
+Distance Dijkstra: 11.598745695293662
+Dijkstra edge in path: 106
+Done 
+
+Running A*
+Iterations of the alg: 1845
+Distance A*: 11.598745695293662
+A* edge in path: 106
+Done 
+
+------------------------------------------------------
+Place: Paris, France, Iteration: 0, Distance 9.71km 
+Dijkstra: 4591, A*: 1424
+Dijkstra e' 222.40% piu' lento di A*
+Number of nodes: 9477, Number of edges: 18223, Number of edges algorithm: 82
+Place: Paris, France, Iteration: 1, Distance 9.71km
+Dijkstra: 4591, A*: 1424
+Dijkstra e' 222.40% piu' lento di A*
+Number of nodes: 9477, Number of edges: 18223, Number of edges algorithm: 82
+Place: Paris, France, Iteration: 2, Distance 9.71km
+Dijkstra: 4591, A*: 1424
+Dijkstra e' 222.40% piu' lento di A*
+Number of nodes: 9477, Number of edges: 18223, Number of edges algorithm: 82
+Place: Piedmont, California, USA, Iteration: 0, Distance 9.04km
+Dijkstra: 9170, A*: 3242
+Dijkstra e' 182.85% piu' lento di A*
+Number of nodes: 352, Number of edges: 944, Number of edges algorithm: 109
+Place: Piedmont, California, USA, Iteration: 1, Distance 9.04km
+Dijkstra: 9170, A*: 3242
+Dijkstra e' 182.85% piu' lento di A*
+Number of nodes: 352, Number of edges: 944, Number of edges algorithm: 109
+Place: Piedmont, California, USA, Iteration: 2, Distance 9.04km
+Dijkstra: 9170, A*: 3242
+Dijkstra e' 182.85% piu' lento di A*
+Number of nodes: 352, Number of edges: 944, Number of edges algorithm: 109
+Place: Turin, Piedmont, Italy, Iteration: 0, Distance 9.30km
+Dijkstra: 7893, A*: 2080
+Dijkstra e' 279.47% piu' lento di A*
+Number of nodes: 12001, Number of edges: 25795, Number of edges algorithm: 81
+Place: Turin, Piedmont, Italy, Iteration: 1, Distance 9.30km
+Dijkstra: 7893, A*: 2080
+Dijkstra e' 279.47% piu' lento di A*
+Number of nodes: 12001, Number of edges: 25795, Number of edges algorithm: 81
+Place: Turin, Piedmont, Italy, Iteration: 2, Distance 9.30km
+Dijkstra: 7893, A*: 2080
+Dijkstra e' 279.47% piu' lento di A*
+Number of nodes: 12001, Number of edges: 25795, Number of edges algorithm: 81
+Place: Berlin, Germany, Iteration: 0, Distance 4.12km
+Dijkstra: 325, A*: 298
+Dijkstra e' 9.06% piu' lento di A*
+Number of nodes: 28221, Number of edges: 73368, Number of edges algorithm: 42
+Place: Berlin, Germany, Iteration: 1, Distance 4.12km
+Dijkstra: 325, A*: 298
+Dijkstra e' 9.06% piu' lento di A*
+Number of nodes: 28221, Number of edges: 73368, Number of edges algorithm: 42
+Place: Berlin, Germany, Iteration: 2, Distance 4.12km
+Dijkstra: 325, A*: 298
+Dijkstra e' 9.06% piu' lento di A*
+Number of nodes: 28221, Number of edges: 73368, Number of edges algorithm: 42
+Place: Rome, Italy, Iteration: 0, Distance 1.70km
+Dijkstra: 211, A*: 79
+Dijkstra e' 167.09% piu' lento di A*
+Number of nodes: 43560, Number of edges: 90244, Number of edges algorithm: 12
+Place: Rome, Italy, Iteration: 1, Distance 1.70km
+Dijkstra: 211, A*: 79
+Dijkstra e' 167.09% piu' lento di A*
+Number of nodes: 43560, Number of edges: 90244, Number of edges algorithm: 12
+Place: Rome, Italy, Iteration: 2, Distance 1.70km
+Dijkstra: 211, A*: 79
+Dijkstra e' 167.09% piu' lento di A*
+Number of nodes: 43560, Number of edges: 90244, Number of edges algorithm: 12
+Place: Barcelona, Spain, Iteration: 0, Distance 2.26km
+Dijkstra: 261, A*: 115
+Dijkstra e' 126.96% piu' lento di A*
+Number of nodes: 8865, Number of edges: 16445, Number of edges algorithm: 22
+Place: Barcelona, Spain, Iteration: 1, Distance 2.26km
+Dijkstra: 261, A*: 115
+Dijkstra e' 126.96% piu' lento di A*
+Number of nodes: 8865, Number of edges: 16445, Number of edges algorithm: 22
+Place: Barcelona, Spain, Iteration: 2, Distance 2.26km
+Dijkstra: 261, A*: 115
+Dijkstra e' 126.96% piu' lento di A*
+Number of nodes: 8865, Number of edges: 16445, Number of edges algorithm: 22
+Place: Madrid, Spain, Iteration: 0, Distance 2.34km
+Dijkstra: 1606, A*: 238
+Dijkstra e' 574.79% piu' lento di A*
+Number of nodes: 31087, Number of edges: 61222, Number of edges algorithm: 53
+Place: Madrid, Spain, Iteration: 1, Distance 2.34km
+Dijkstra: 1606, A*: 238
+Dijkstra e' 574.79% piu' lento di A*
+Number of nodes: 31087, Number of edges: 61222, Number of edges algorithm: 53
+Place: Madrid, Spain, Iteration: 2, Distance 2.34km
+Dijkstra: 1606, A*: 238
+Dijkstra e' 574.79% piu' lento di A*
+Number of nodes: 31087, Number of edges: 61222, Number of edges algorithm: 53
+Place: London, England, Iteration: 0, Distance 4.33km
+Dijkstra: 5862, A*: 625
+Dijkstra e' 837.92% piu' lento di A*
+Number of nodes: 129223, Number of edges: 301159, Number of edges algorithm: 68
+Place: London, England, Iteration: 1, Distance 4.33km
+Dijkstra: 5862, A*: 625
+Dijkstra e' 837.92% piu' lento di A*
+Number of nodes: 129223, Number of edges: 301159, Number of edges algorithm: 68
+Place: London, England, Iteration: 2, Distance 4.33km
+Dijkstra: 5862, A*: 625
+Dijkstra e' 837.92% piu' lento di A*
+Number of nodes: 129223, Number of edges: 301159, Number of edges algorithm: 68
+Place: New York City, New York, USA, Iteration: 0, Distance 3.02km
+Dijkstra: 1866, A*: 101
+Dijkstra e' 1747.52% piu' lento di A*
+Number of nodes: 55246, Number of edges: 139286, Number of edges algorithm: 40
+Place: New York City, New York, USA, Iteration: 1, Distance 3.02km
+Dijkstra: 1866, A*: 101
+Dijkstra e' 1747.52% piu' lento di A*
+Number of nodes: 55246, Number of edges: 139286, Number of edges algorithm: 40
+Place: New York City, New York, USA, Iteration: 2, Distance 3.02km
+Dijkstra: 1866, A*: 101
+Dijkstra e' 1747.52% piu' lento di A*
+Number of nodes: 55246, Number of edges: 139286, Number of edges algorithm: 40
+Dijkstra iterations: [4591, 9170, 7893, 325, 211, 261, 1606, 5862, 1866, 11498, 27621, 22256, 2926, 11375, 2631, 7079, 6094, 3253, 26598, 2507, 11886, 5743, 93319, 68979, 54104, 14346, 12041]
+A* iterations: [1424, 3242, 2080, 298, 79, 115, 238, 625, 101, 377, 4017, 383, 355, 613, 281, 2772, 308, 144, 705, 546, 608, 2155, 35899, 21751, 23354, 3037, 1845]
+Dijkstra average iterations: 15408.925925925925
+A* average iterations: 3976.0
