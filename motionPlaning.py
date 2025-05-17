@@ -431,23 +431,43 @@ if __name__ == "__main__":
 
     with open("results.txt", "w") as file:
         for i in range(len(place_names)):
-            for j in range(3):
-                result = f"Place: {place_names[i]}, Iteration: {j}, Distance {(distaces[i]):.2f}km \nDijkstra: {interations_Dijkstra[i]}, A*: {interations_A_star[i]}\n"
-                comparison = (
-                    f"Dijkstra e' {((interations_Dijkstra[i] - interations_A_star[i]) * 100 / interations_A_star[i]):.2f}% piu' lento di A*\n"
-                    if interations_A_star[i] != 0 
-                    else "A* non ha completato, confronto non possibile.\n"
-                )
-                information = (
-                    f"Number of nodes: {number_of_nodes[i]}, Number of edges: {number_of_edges[i]}, Number of edges algorithm: {number_of_edges_algorithm[i]}\n"
-                )
-                print(result.strip())
-                print(comparison.strip())
-                file.write(result)
-                file.write(comparison)
-                print(information.strip())
-                file.write(information)
-                file.write("\n")
+                for j in range(3):
+                    index = i * 3 + j  # indice corretto per ciascuna iterazione
+
+                    # Costruzione della stringa di risultato
+                    result = (
+                        f"Place: {place_names[i]}, Iteration: {j}, "
+                        f"Distance {distaces[index]:.2f}km\n"
+                        f"Dijkstra: {interations_Dijkstra[index]}, "
+                        f"A*: {interations_A_star[index]}\n"
+                    )
+
+                    # Confronto delle iterazioni
+                    if interations_A_star[index] != 0:
+                        slowdown = (
+                            (interations_Dijkstra[index] - interations_A_star[index])
+                            * 100
+                            / interations_A_star[index]
+                        )
+                        comparison = f"Dijkstra è {slowdown:.2f}% più lento di A*\n"
+                    else:
+                        comparison = "A* non ha completato, confronto non possibile.\n"
+
+                    # Informazioni sul grafo
+                    information = (
+                        f"Number of nodes: {number_of_nodes[i]}, "
+                        f"Number of edges: {number_of_edges[i]}, "
+                        f"Number of edges algorithm: {number_of_edges_algorithm[index]}\n\n"
+                    )
+
+                    # Stampa e scrittura su file
+                    print(result.strip())
+                    print(comparison.strip())
+                    print(information.strip())
+
+                    file.write(result)
+                    file.write(comparison)
+                    file.write(information)
         dijkstra_iterations = f"Dijkstra iterations: {interations_Dijkstra}\n"
         a_star_iterations = f"A* iterations: {interations_A_star}\n"
         dijkstra_avg = f"Dijkstra average iterations: {sum(interations_Dijkstra) / len(interations_Dijkstra)}\n"
