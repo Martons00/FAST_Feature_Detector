@@ -81,11 +81,9 @@ def A_star(G, orig, dest, plot=False):
     f_score = {node: float('inf') for node in G.nodes}
     f_score[orig] = heuristic(G, orig, dest)
     
-    # Struttura per tracciare le voci attive nell'heap
-    entry_map = {}  # Mappa nodo → [f_score, entry_count, is_valid]
-    entry_count = 0  # Contatore per gestire l'ordinamento in heapq
+    entry_map = {}  
+    entry_count = 0  
 
-    # Inserimento iniziale
     entry = [f_score[orig], entry_count, orig]
     heapq.heappush(open_heap, entry)
     entry_map[orig] = entry
@@ -94,7 +92,6 @@ def A_star(G, orig, dest, plot=False):
     closed_set = set()
     step = 0
 
-    # Inizializzazione attributi (come prima)
     for node in G.nodes:
         G.nodes[node]["visited"] = False
         G.nodes[node]["distance"] = float('inf')
@@ -111,7 +108,6 @@ def A_star(G, orig, dest, plot=False):
     while open_heap:
         current_f, count, current = heapq.heappop(open_heap)
         
-        # Controlla se la voce è ancora valida
         if current not in entry_map or entry_map[current][0] < current_f:
             continue
             
@@ -123,7 +119,7 @@ def A_star(G, orig, dest, plot=False):
 
         closed_set.add(current)
         G.nodes[current]["visited"] = True
-        step += 1  # Incrementa SOLO quando processi effettivamente un nodo
+        step += 1  
 
         for u, v, k in G.out_edges(current, keys=True):
             neighbor = v
@@ -137,14 +133,11 @@ def A_star(G, orig, dest, plot=False):
                 g_score[neighbor] = tentative_g
                 new_f = tentative_g + heuristic(G, neighbor, dest)
                 
-                # Aggiorna solo se migliora il best score
                 if neighbor in entry_map:
                     old_f = entry_map[neighbor][0]
                     if new_f >= old_f:
                         continue
-                    entry_map[neighbor][2] = 'REMOVED'  # Invalida la vecchia entry
-                
-                # Crea nuova entry
+                    entry_map[neighbor][2] = 'REMOVED'  
                 entry = [new_f, entry_count, neighbor]
                 entry_count += 1
                 heapq.heappush(open_heap, entry)
@@ -432,9 +425,7 @@ if __name__ == "__main__":
     with open("results.txt", "w") as file:
         for i in range(len(place_names)):
                 for j in range(3):
-                    index = i * 3 + j  # indice corretto per ciascuna iterazione
-
-                    # Costruzione della stringa di risultato
+                    index = i * 3 + j 
                     result = (
                         f"Place: {place_names[i]}, Iteration: {j}, "
                         f"Distance {distaces[index]:.2f}km\n"
@@ -442,7 +433,6 @@ if __name__ == "__main__":
                         f"A*: {interations_A_star[index]}\n"
                     )
 
-                    # Confronto delle iterazioni
                     if interations_A_star[index] != 0:
                         slowdown = (
                             (interations_Dijkstra[index] - interations_A_star[index])
@@ -453,14 +443,12 @@ if __name__ == "__main__":
                     else:
                         comparison = "A* non ha completato, confronto non possibile.\n"
 
-                    # Informazioni sul grafo
                     information = (
                         f"Number of nodes: {number_of_nodes[i]}, "
                         f"Number of edges: {number_of_edges[i]}, "
                         f"Number of edges algorithm: {number_of_edges_algorithm[index]}\n\n"
                     )
 
-                    # Stampa e scrittura su file
                     print(result.strip())
                     print(comparison.strip())
                     print(information.strip())
